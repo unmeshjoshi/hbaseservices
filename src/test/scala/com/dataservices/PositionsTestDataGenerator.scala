@@ -7,16 +7,17 @@ import org.apache.hadoop.hbase.util.Bytes
 class PositionsTestDataGenerator(hbaseTestUtility:HBaseTestingUtility, val columnFamily: String = "cf", val tableName:String = "positions") {
 
   def seedData(acctKey: String, valueAsOfDate: String, assetClassCode: String) = {
-    createTable(tableName, columnFamily)
     putRow(acctKey, valueAsOfDate, assetClassCode)
+    this
   }
 
-  private def createTable(tableName: String, columnFamily: String) = {
+  def createTable() = {
     val cf = ColumnFamilyDescriptorBuilder.of(columnFamily)
     val desc = TableDescriptorBuilder.newBuilder(TableName.valueOf(tableName))
       .setColumnFamily(cf)
     val tableDescriptor: TableDescriptor = desc.build()
     hbaseTestUtility.getAdmin.createTable(tableDescriptor)
+    this
   }
 
   private def putRow(acctKey: String, valueAsOfDate: String, accetClassCd: String) = {

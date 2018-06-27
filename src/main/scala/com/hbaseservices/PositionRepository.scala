@@ -10,6 +10,10 @@ import scala.collection.JavaConversions._
 class PositionRepository(val connection: Connection) {
   val columnFamily = "cf"
 
+  def getPositionsFor(acctKey: String, aggregateByField:String): List[Position] = {
+    List[Position]()
+  }
+
   def getPositionsFor(acctKey: String): List[Position] = {
     val scan: Scan = buildScanner(acctKey)
     val scanResult = executeScan(scan)
