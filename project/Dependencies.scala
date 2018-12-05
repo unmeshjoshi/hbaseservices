@@ -4,7 +4,7 @@ object Dependencies {
 
   val Version = "0.1-SNAPSHOT"
   val HbaseService = Seq(
-    Libs.`guava`,
+    Libs.`guava`,  //need to put in specific version 12.0.1 which hadoop and hbase versions from cdh 5.4.14 depend on. Its excluded explicitly from all the other cdh dependencies
     Libs.`mockito-core` % Test,
     Libs.`scalatest` % Test,
     HBase.`hbase-client`,

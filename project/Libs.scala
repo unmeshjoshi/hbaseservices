@@ -1,7 +1,16 @@
 import sbt._
 import scalapb.compiler.Version.scalapbVersion
 
+object CDHVersions {
+  val Hbase = "1.2.0-cdh5.14.4"
+  val Hadoop = "2.6.0-cdh5.14.4"
+  val Spark = "2.3.0.cloudera4"
+  val Sqoop = "1.99.5-cdh5.14.4"
+}
+
 object Libs {
+
+
   val ScalaVersion = "2.11.8"
 
   val `scalatest` = "org.scalatest" %% "scalatest" % "3.0.4" //Apache License 2.0
@@ -26,7 +35,7 @@ object Libs {
   val `scalapb-runtime` = "com.trueaccord.scalapb" %% "scalapb-runtime" % scalapbVersion % "protobuf"
   val `scalapb-json4s` = "com.trueaccord.scalapb" %% "scalapb-json4s" % "0.3.3"
   val `google-guice` = "com.google.inject" % "guice" % "4.1.0"
-  val `guava` = "com.google.guava" % "guava" % "15.0" force()
+  val `guava` = "com.google.guava" % "guava" % "12.0.1"
   val `typesafe-config` = "com.typesafe" % "config" % "1.3.2"
   val `enumeration` = "com.beachape" %% "enumeratum" % "1.5.13"
   val `scalaop` = "org.rogach" %% "scallop" % "3.1.4"
@@ -82,8 +91,7 @@ object Kafka {
 }
 
 object Sqoop {
-  val Version = "1.99.5-cdh5.14.4"
-  val `sqoop` = "org.apache.sqoop" % "sqoop" % Version % "provided"
+  val `sqoop` = "org.apache.sqoop" % "sqoop" % CDHVersions.Sqoop % "provided"
 
   val `commons-io` = "commons-io" % "commons-io" % "2.4" exclude("commons-logging", "commons-logging") force()
   val `commons-cli` = "commons-cli" % "commons-cli" % "1.2" exclude("commons-logging", "commons-logging") force()
@@ -98,30 +106,32 @@ object Oracle {
 }
 
 object Hadoop {
-  val HadoopVersion = "2.6.0-cdh5.14.4"
-  val `hadoop-common` = "org.apache.hadoop" % "hadoop-common" % HadoopVersion % "provided"
-  val `hadoop-hdfs` = "org.apache.hadoop" % "hadoop-hdfs" % HadoopVersion % "provided"
-  val `hadoop-auth` = "org.apache.hadoop" % "hadoop-auth" % HadoopVersion % "provided"
-  val `hadoop-client` = "org.apache.hadoop" % "hadoop-client" % HadoopVersion % "provided"
-  val `hadoop-core` = "org.apache.hadoop" % "hadoop-core" % HadoopVersion % "provided"
+  val `hadoop-common` = "org.apache.hadoop" % "hadoop-common" % CDHVersions.Hadoop % "provided"  excludeAll(
+    ExclusionRule(organization = "com.google.guava", "guava"))
+  val `hadoop-hdfs` = "org.apache.hadoop" % "hadoop-hdfs" % CDHVersions.Hadoop % "provided"  excludeAll(
+    ExclusionRule(organization = "com.google.guava", "guava"))
+  val `hadoop-auth` = "org.apache.hadoop" % "hadoop-auth" % CDHVersions.Hadoop % "provided"  excludeAll(
+    ExclusionRule(organization = "com.google.guava", "guava"))
+  val `hadoop-client` = "org.apache.hadoop" % "hadoop-client" % CDHVersions.Hadoop % "provided"  excludeAll(
+    ExclusionRule(organization = "com.google.guava", "guava"))
+  val `hadoop-core` = "org.apache.hadoop" % "hadoop-core" % CDHVersions.Hadoop % "provided"  excludeAll(
+    ExclusionRule(organization = "com.google.guava", "guava"))
 }
 
 object Spark {
-  val SparkVersion = "2.3.0.cloudera4"
-  val `spark-core` = "org.apache.spark" %% "spark-core" % SparkVersion % "provided" excludeAll(
+  val `spark-core` = "org.apache.spark" %% "spark-core" % CDHVersions.Spark % "provided"  excludeAll(
     ExclusionRule(organization = "com.google.guava", "guava"))
 
-  val `spark-sql` = "org.apache.spark" %% "spark-sql" % SparkVersion % "provided" excludeAll(
+  val `spark-sql` = "org.apache.spark" %% "spark-sql" % CDHVersions.Spark % "provided"  excludeAll(
     ExclusionRule(organization = "com.google.guava", "guava"))
 
   val `avro` = "com.databricks" %% "spark-avro" % "4.0.0" % "provided"
-  val `spark-catalyst-test` = "org.apache.spark" %% "spark-catalyst" % SparkVersion % "test" classifier "tests" excludeAll(
+  val `spark-catalyst-test` = "org.apache.spark" %% "spark-catalyst" % CDHVersions.Spark % "test" classifier "tests"  excludeAll(
+    ExclusionRule(organization = "com.google.guava", "guava"))
+  val `spark-core-test` = "org.apache.spark" %% "spark-core" % CDHVersions.Spark % "test" classifier "tests"  excludeAll(
     ExclusionRule(organization = "com.google.guava", "guava"))
 
-  val `spark-core-test` = "org.apache.spark" %% "spark-core" % SparkVersion % "test" classifier "tests" excludeAll(
-    ExclusionRule(organization = "com.google.guava", "guava"))
-
-  val `spark-sql-test` = "org.apache.spark" %% "spark-sql" % SparkVersion % "test" classifier "tests" excludeAll(
+  val `spark-sql-test` = "org.apache.spark" %% "spark-sql" % CDHVersions.Spark % "test" classifier "tests"  excludeAll(
     ExclusionRule(organization = "com.google.guava", "guava"))
 
 
@@ -129,23 +139,28 @@ object Spark {
 
 
 object HBase {
-  val HbaseDependencyVersion = "1.2.0-cdh5.14.4"
-  val `hbase-client` = "org.apache.hbase" % "hbase-client" % HbaseDependencyVersion % "provided" excludeAll(
+
+  val `hbase-client` = "org.apache.hbase" % "hbase-client" % CDHVersions.Hbase % "provided" excludeAll(
     ExclusionRule(organization = "com.google.guava", "guava"))
 
-  val `hbase-server` = "org.apache.hbase" % "hbase-server" % HbaseDependencyVersion % "provided"
-  val `hbase-common` = "org.apache.hbase" % "hbase-common" % HbaseDependencyVersion % "provided"
-  val `hbase-protocol` = "org.apache.hbase" % "hbase-protocol" % HbaseDependencyVersion % "provided"
+  val `hbase-server` = "org.apache.hbase" % "hbase-server" % CDHVersions.Hbase % "provided"  excludeAll(
+    ExclusionRule(organization = "com.google.guava", "guava"))
+
+  val `hbase-common` = "org.apache.hbase" % "hbase-common" % CDHVersions.Hbase % "provided"  excludeAll(
+    ExclusionRule(organization = "com.google.guava", "guava"))
+  val `hbase-protocol` = "org.apache.hbase" % "hbase-protocol" % CDHVersions.Hbase % "provided"  excludeAll(
+    ExclusionRule(organization = "com.google.guava", "guava"))
 
   object TestOnly {
-    val HbaseDependencyVersion = "1.2.0-cdh5.14.4"
-    val HadoopVersion = "2.6.0-cdh5.14.4"
-    val `hadoop-common-tests` = "org.apache.hadoop" % "hadoop-common" % HadoopVersion % Test classifier "tests"
-    val `hbase-tests` = "org.apache.hbase" % "hbase" % HbaseDependencyVersion % Test classifier "tests"
-    val `hadoop-hdfs-tests` = "org.apache.hadoop" % "hadoop-hdfs" % HadoopVersion % Test classifier "tests"
-    val `hbase-test-utils` = "org.apache.hbase" % "hbase-testing-util" % HbaseDependencyVersion % Test classifier "tests" excludeAll(
+    val `hadoop-common-tests` = "org.apache.hadoop" % "hadoop-common" % CDHVersions.Hadoop % Test classifier "tests"  excludeAll(
+      ExclusionRule(organization = "com.google.guava", "guava"))
+    val `hbase-tests` = "org.apache.hbase" % "hbase" % CDHVersions.Hbase % Test classifier "tests"  excludeAll(
+      ExclusionRule(organization = "com.google.guava", "guava"))
+    val `hadoop-hdfs-tests` = "org.apache.hadoop" % "hadoop-hdfs" % CDHVersions.Hadoop % Test classifier "tests"  excludeAll(
       ExclusionRule(organization = "com.google.guava", "guava"))
 
+    val `hbase-test-utils` = "org.apache.hbase" % "hbase-testing-util" % CDHVersions.Hbase % Test classifier "tests"  excludeAll(
+      ExclusionRule(organization = "com.google.guava", "guava"))
   }
 }
 
