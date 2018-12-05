@@ -25,6 +25,14 @@ object Libs {
   val `akka-http-play-json` = "de.heikoseeberger" %% "akka-http-play-json" % "1.18.1" //Apache 2.0
   val `scalapb-runtime` = "com.trueaccord.scalapb" %% "scalapb-runtime" % scalapbVersion % "protobuf"
   val `scalapb-json4s` = "com.trueaccord.scalapb" %% "scalapb-json4s" % "0.3.3"
+  val `google-guice` = "com.google.inject" % "guice" % "4.1.0"
+  val `guava` = "com.google.guava" % "guava" % "15.0" force()
+  val `typesafe-config` = "com.typesafe" % "config" % "1.3.2"
+  val `enumeration` = "com.beachape" %% "enumeratum" % "1.5.13"
+  val `scalaop` = "org.rogach" %% "scallop" % "3.1.4"
+
+  val `geode` = "org.apache.geode" % "geode-core" % "1.6.0"
+
 }
 
 object Jackson {
@@ -73,23 +81,97 @@ object Kafka {
   val `scalatest-embedded-kafka` = "net.manub" %% "scalatest-embedded-kafka" % "1.1.0"
 }
 
-object SparkLibs {
-  val Version = "2.3.1"
-  val sparkCore = "org.apache.spark" %% "spark-core" % Version
-  val sparkStreaming = "org.apache.spark" %% "spark-streaming" % Version
-  val sparkSQL = "org.apache.spark" %% "spark-sql" % Version
-  val sparkHiveSQL = "org.apache.spark" %% "spark-hive" % Version
-  val sparkTestingBase = "com.holdenkarau" %% "spark-testing-base" % "2.2.0_0.8.0"
-  //FIXME  val sparkRepl      = "org.apache.spark"  %% "spark-repl"      % Version
-  val sparkStreamingKafka = "org.apache.spark" %% "spark-streaming-kafka-0-10" % Version
-  val sparkStructuredStreamingKafka = "org.apache.spark" %% "spark-sql-kafka-0-10" % Version
+object Sqoop {
+  val Version = "1.99.5-cdh5.14.4"
+  val `sqoop` = "org.apache.sqoop" % "sqoop" % Version % "provided"
+
+  val `commons-io` = "commons-io" % "commons-io" % "2.4" exclude("commons-logging", "commons-logging") force()
+  val `commons-cli` = "commons-cli" % "commons-cli" % "1.2" exclude("commons-logging", "commons-logging") force()
+  val `commons-logging` = "commons-logging" % "commons-logging" % "1.0.4" force()
+  val `log4j` = "log4j" % "log4j" % "1.2.16"
+
 }
 
+object Oracle {
+  val OracleVersion = "11.2.0.3"
+  val `ojdbc6` = "oracle" % "ojdbc6" % OracleVersion
+}
+
+object Hadoop {
+  val HadoopVersion = "2.6.0-cdh5.14.4"
+  val `hadoop-common` = "org.apache.hadoop" % "hadoop-common" % HadoopVersion % "provided"
+  val `hadoop-hdfs` = "org.apache.hadoop" % "hadoop-hdfs" % HadoopVersion % "provided"
+  val `hadoop-auth` = "org.apache.hadoop" % "hadoop-auth" % HadoopVersion % "provided"
+  val `hadoop-client` = "org.apache.hadoop" % "hadoop-client" % HadoopVersion % "provided"
+  val `hadoop-core` = "org.apache.hadoop" % "hadoop-core" % HadoopVersion % "provided"
+}
+
+object Spark {
+  val SparkVersion = "2.3.0.cloudera4"
+  val `spark-core` = "org.apache.spark" %% "spark-core" % SparkVersion % "provided" excludeAll(
+    ExclusionRule(organization = "com.google.guava", "guava"))
+
+  val `spark-sql` = "org.apache.spark" %% "spark-sql" % SparkVersion % "provided" excludeAll(
+    ExclusionRule(organization = "com.google.guava", "guava"))
+
+  val `avro` = "com.databricks" %% "spark-avro" % "4.0.0" % "provided"
+  val `spark-catalyst-test` = "org.apache.spark" %% "spark-catalyst" % SparkVersion % "test" classifier "tests" excludeAll(
+    ExclusionRule(organization = "com.google.guava", "guava"))
+
+  val `spark-core-test` = "org.apache.spark" %% "spark-core" % SparkVersion % "test" classifier "tests" excludeAll(
+    ExclusionRule(organization = "com.google.guava", "guava"))
+
+  val `spark-sql-test` = "org.apache.spark" %% "spark-sql" % SparkVersion % "test" classifier "tests" excludeAll(
+    ExclusionRule(organization = "com.google.guava", "guava"))
+
+
+}
+
+
 object HBase {
-  val Version = "2.0.0"
-  val hadoopCommon = "org.apache.hadoop" % "hadoop-common" % "2.7.2"
-  val hadoopHdfs = "org.apache.hadoop" % "hadoop-hdfs" % "2.7.2"
-  val hbase = "org.apache.hbase" % "hbase" % Version
-  val hbaseClient = "org.apache.hbase" % "hbase-client" % Version
-  val hbaseTestingUtil = "org.apache.hbase" % "hbase-testing-util" % Version classifier "test"
+  val HbaseDependencyVersion = "1.2.0-cdh5.14.4"
+  val `hbase-client` = "org.apache.hbase" % "hbase-client" % HbaseDependencyVersion % "provided" excludeAll(
+    ExclusionRule(organization = "com.google.guava", "guava"))
+
+  val `hbase-server` = "org.apache.hbase" % "hbase-server" % HbaseDependencyVersion % "provided"
+  val `hbase-common` = "org.apache.hbase" % "hbase-common" % HbaseDependencyVersion % "provided"
+  val `hbase-protocol` = "org.apache.hbase" % "hbase-protocol" % HbaseDependencyVersion % "provided"
+
+  object TestOnly {
+    val HbaseDependencyVersion = "1.2.0-cdh5.14.4"
+    val HadoopVersion = "2.6.0-cdh5.14.4"
+    val `hadoop-common-tests` = "org.apache.hadoop" % "hadoop-common" % HadoopVersion % Test classifier "tests"
+    val `hbase-tests` = "org.apache.hbase" % "hbase" % HbaseDependencyVersion % Test classifier "tests"
+    val `hadoop-hdfs-tests` = "org.apache.hadoop" % "hadoop-hdfs" % HadoopVersion % Test classifier "tests"
+    val `hbase-test-utils` = "org.apache.hbase" % "hbase-testing-util" % HbaseDependencyVersion % Test classifier "tests" excludeAll(
+      ExclusionRule(organization = "com.google.guava", "guava"))
+
+  }
+}
+
+object Yaml {
+  val `yaml-parser` = "net.jcazevedo" %% "moultingyaml" % "0.4.0"
+}
+
+object JSON {
+  val JsonVersion = "20171018"
+  val `json` = "org.json" % "json" % JsonVersion
+}
+
+object OtherJars {
+
+  val `commons-lang3` = "org.apache.commons" % "commons-lang3" % "3.0"
+  val `guava` = "com.google.guava" % "guava" % "15.0"
+  val `httpcore` = "org.apache.httpcomponents" % "httpcore" % "4.2.2"
+  val `spark-avro` = "com.databricks" %% "spark-avro" % "4.0.0"
+  val `avro-mapred-hadoop2` = "org.apache.avro" % "avro-mapred" % "1.7.7" classifier "hadoop2"
+  val `scala-logging` = "com.typesafe.scala-logging" %% "scala-logging" % "3.7.2"
+  val `logback` = "ch.qos.logback" % "logback-classic" % "1.2.3"
+  val `logback-json-encoder` = "net.logstash.logback" % "logstash-logback-encoder" % "4.11" excludeAll ExclusionRule(
+    organization = "com.fasterxml.jackson.core"
+  )
+}
+
+object Excluded {
+  val `slf4j-log4j12` = "org.slf4j" % "slf4j-log4j12"
 }

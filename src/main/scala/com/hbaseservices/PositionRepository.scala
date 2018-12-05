@@ -54,9 +54,8 @@ class PositionRepository(val connection: Connection) {
   }
 
   private def buildScanner(acctKey: String) = {
-    val scan = new Scan()
     val acctKeyBytes = Bytes.toBytes(acctKey)
-    scan.withStartRow(acctKeyBytes)
+    val scan = new Scan(acctKeyBytes)
     scan.setMaxResultSize(1000)
     scan.setBatch(100)
     val filter = new PrefixFilter(acctKeyBytes)
