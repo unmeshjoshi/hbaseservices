@@ -2,6 +2,7 @@ package com.dataservices
 
 import com.hbaseservices.PositionRepository
 import org.apache.hadoop.conf.Configuration
+import org.apache.hadoop.hbase.client.ConnectionFactory
 import org.apache.hadoop.hbase.{HBaseConfiguration, HBaseTestingUtility, HConstants}
 import org.scalatest.concurrent.Eventually
 import org.scalatest.{BeforeAndAfterAll, FunSuite, Matchers}
@@ -21,16 +22,18 @@ class DataServiceTest extends FunSuite with BeforeAndAfterAll with Matchers with
     println("test passed")
   }
 //
-//  test("should get list of positions for account key") {
-//    new PositionsTestDataGenerator(hbaseTestUtility)
-//      .createTable()
-//      .seedData("10100002899999", "19-Aug-14", "MONEYMAREKTMF")
-//
-//    val positions = new PositionRepository(hbaseTestUtility.getConnection).getPositionsFor("10100002899999")
-//
-//    assert(positions.size == 1)
-//    assert(positions(0).acctKey == "10100002899999")
-//  }
+  test("should get list of positions for account key") {
+    new PositionsTestDataGenerator(hbaseTestUtility)
+      .createTable()
+      .seedData("10100002899999", "19-Aug-14", "MONEYMAREKTMF")
+
+    val c = hbaseTestUtility.getConnection
+
+    val positions = new PositionRepository(c).getPositionsFor("10100002899999")
+
+    assert(positions.size == 1)
+    assert(positions(0).acctKey == "10100002899999")
+  }
 //
 //  //TODO: Fetch product processor accountid from demographic service given acctKey?
 //  //Aggregateby

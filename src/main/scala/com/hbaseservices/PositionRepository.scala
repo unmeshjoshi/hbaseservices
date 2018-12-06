@@ -15,6 +15,12 @@ class PositionRepository(val connection: Connection) {
   }
 
   def getPositionsFor(acctKey: String): List[Position] = {
+    val key = Bytes.toBytes(s"${acctKey}-19-Aug-14-MONEYMAREKTMF")
+    val g = new Get(key)
+    val table = connection.getTable(TableName.valueOf("positions"))
+    val result = table.get(g)
+
+
     val scan: Scan = buildScanner(acctKey)
     val scanResult = executeScan(scan)
     val positions = getPositions(acctKey, scanResult)
@@ -56,10 +62,6 @@ class PositionRepository(val connection: Connection) {
   private def buildScanner(acctKey: String) = {
     val acctKeyBytes = Bytes.toBytes(acctKey)
     val scan = new Scan(acctKeyBytes)
-    scan.setMaxResultSize(1000)
-    scan.setBatch(100)
-    val filter = new PrefixFilter(acctKeyBytes)
-    scan.setFilter(filter)
     scan
   }
 }
