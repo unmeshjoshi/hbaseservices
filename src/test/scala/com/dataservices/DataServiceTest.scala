@@ -2,7 +2,6 @@ package com.dataservices
 
 import com.hbaseservices.PositionRepository
 import org.apache.hadoop.conf.Configuration
-import org.apache.hadoop.hbase.client.ConnectionFactory
 import org.apache.hadoop.hbase.{HBaseConfiguration, HBaseTestingUtility, HConstants}
 import org.scalatest.concurrent.Eventually
 import org.scalatest.{BeforeAndAfterAll, FunSuite, Matchers}
@@ -18,9 +17,6 @@ class DataServiceTest extends FunSuite with BeforeAndAfterAll with Matchers with
     hbaseTestUtility.shutdownMiniCluster()
   }
 
-  test("empty test") {
-    println("test passed")
-  }
 //
   test("should get list of positions for account key") {
     new PositionsTestDataGenerator(hbaseTestUtility)

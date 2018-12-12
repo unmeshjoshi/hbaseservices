@@ -5,7 +5,7 @@ import org.apache.hadoop.hbase.{HBaseConfiguration, HBaseTestingUtility, HConsta
 import org.scalatest.concurrent.Eventually
 import org.scalatest.{BeforeAndAfterAll, FunSuite, Matchers}
 
-class HBaseTimeStampTestextends extends FunSuite with BeforeAndAfterAll with Matchers with Eventually {
+class HBaseTimeStampTestextends extends  FunSuite with BeforeAndAfterAll with Matchers with Eventually{
   val hbaseTestUtility = newHbaseTestUtility
 //
 //  test("should give timestamp for new row") {

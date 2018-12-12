@@ -4,8 +4,8 @@ import scalapb.compiler.Version.scalapbVersion
 object CDHVersions {
   val Hbase = "1.2.0-cdh5.14.4"
   val Hadoop = "2.6.0-cdh5.14.4"
-  val Spark = "2.3.0.cloudera4"
-  val Sqoop = "1.99.5-cdh5.14.4"
+  val Spark = "2.3.0.cloudera2"
+  val Sqoop = "1.4.6-cdh5.14.4"
 }
 
 object Libs {
@@ -41,6 +41,7 @@ object Libs {
   val `scalaop` = "org.rogach" %% "scallop" % "3.1.4"
 
   val `geode` = "org.apache.geode" % "geode-core" % "1.6.0"
+  val `hsqldb` = "org.hsqldb" % "hsqldb" % "2.4.1"
 
 }
 
@@ -91,7 +92,9 @@ object Kafka {
 }
 
 object Sqoop {
-  val `sqoop` = "org.apache.sqoop" % "sqoop" % CDHVersions.Sqoop % "provided"
+  val `sqoop` = "org.apache.sqoop" % "sqoop" % CDHVersions.Sqoop % "provided" pomOnly()  excludeAll(
+    ExclusionRule(organization = "org.pentaho"),
+    ExclusionRule(organization = "eigenbase", name="eigenbase-properties"))
 
   val `commons-io` = "commons-io" % "commons-io" % "2.4" exclude("commons-logging", "commons-logging") force()
   val `commons-cli` = "commons-cli" % "commons-cli" % "1.2" exclude("commons-logging", "commons-logging") force()
