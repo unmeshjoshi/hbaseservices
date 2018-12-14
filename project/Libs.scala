@@ -6,6 +6,7 @@ object CDHVersions {
   val Hadoop = "2.6.0-cdh5.14.4"
   val Spark = "2.3.0.cloudera2"
   val Sqoop = "1.4.6-cdh5.14.4"
+  val `kite-data-mapreduce` =  "1.0.0-cdh5.14.4" //required by sqoop for parquet format
 }
 
 object Libs {
@@ -41,7 +42,7 @@ object Libs {
   val `scalaop` = "org.rogach" %% "scallop" % "3.1.4"
 
   val `geode` = "org.apache.geode" % "geode-core" % "1.6.0"
-  val `hsqldb` = "org.hsqldb" % "hsqldb" % "2.4.1"
+  val `hsqldb` = "org.hsqldb" % "hsqldb" % "1.8.0.10"  //2.4.1 gives connection error with no username/password
 
 }
 
@@ -92,15 +93,10 @@ object Kafka {
 }
 
 object Sqoop {
-  val `sqoop` = "org.apache.sqoop" % "sqoop" % CDHVersions.Sqoop % "provided" pomOnly()  excludeAll(
-    ExclusionRule(organization = "org.pentaho"),
+  val `sqoop` = "org.apache.sqoop" % "sqoop" % CDHVersions.Sqoop % "provided" excludeAll(
+    ExclusionRule(organization = "org.pentaho", name="pentaho-aggdesigner-algorithm"),
     ExclusionRule(organization = "eigenbase", name="eigenbase-properties"))
-
-  val `commons-io` = "commons-io" % "commons-io" % "2.4" exclude("commons-logging", "commons-logging") force()
-  val `commons-cli` = "commons-cli" % "commons-cli" % "1.2" exclude("commons-logging", "commons-logging") force()
-  val `commons-logging` = "commons-logging" % "commons-logging" % "1.0.4" force()
-  val `log4j` = "log4j" % "log4j" % "1.2.16"
-
+  val `kite-data-mapreduce` = "org.kitesdk" % "kite-data-mapreduce" % CDHVersions.`kite-data-mapreduce` % "provided"
 }
 
 object Oracle {
