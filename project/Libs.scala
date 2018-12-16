@@ -23,7 +23,6 @@ object Libs {
   val `mockito-core` = "org.mockito" % "mockito-core" % "2.12.0" //MIT License
   val `logback-classic` = "ch.qos.logback" % "logback-classic" % "1.2.3" //Dual license: Either, Eclipse Public License v1.0 or GNU Lesser General Public License version 2.1
   val svnkit = "org.tmatesoft.svnkit" % "svnkit" % "1.9.0" //TMate Open Source License
-  val `commons-codec` = "commons-codec" % "commons-codec" % "1.10" //Apache 2.0
   val `scala-reflect` = "org.scala-lang" % "scala-reflect" % ScalaVersion //BSD-3
   val `gson` = "com.google.code.gson" % "gson" % "2.8.2" //Apache 2.0
   val `play-json` = "com.typesafe.play" %% "play-json" % "2.6.7" //Apache 2.0
@@ -65,7 +64,8 @@ object Kafka {
 object Sqoop {
   val `sqoop` = "org.apache.sqoop" % "sqoop" % CDHVersions.Sqoop % "provided" excludeAll(
     ExclusionRule(organization = "org.pentaho", name="pentaho-aggdesigner-algorithm"),
-    ExclusionRule(organization = "eigenbase", name="eigenbase-properties"))
+    ExclusionRule(organization = "eigenbase", name="eigenbase-properties"),
+    ExclusionRule(organization = "com.google.guava", "guava"))
   val `kite-data-mapreduce` = "org.kitesdk" % "kite-data-mapreduce" % CDHVersions.`kite-data-mapreduce` % "provided"
 }
 
@@ -113,22 +113,7 @@ object HBase {
   val `hbase-client` = "org.apache.hbase" % "hbase-client" % CDHVersions.Hbase % "provided" excludeAll(
     ExclusionRule(organization = "com.google.guava", "guava"))
 
-  val `hbase-server` = "org.apache.hbase" % "hbase-server" % CDHVersions.Hbase % "provided"  excludeAll(
-    ExclusionRule(organization = "com.google.guava", "guava"))
-
-  val `hbase-common` = "org.apache.hbase" % "hbase-common" % CDHVersions.Hbase % "provided"  excludeAll(
-    ExclusionRule(organization = "com.google.guava", "guava"))
-  val `hbase-protocol` = "org.apache.hbase" % "hbase-protocol" % CDHVersions.Hbase % "provided"  excludeAll(
-    ExclusionRule(organization = "com.google.guava", "guava"))
-
   object TestOnly {
-    val `hadoop-common-tests` = "org.apache.hadoop" % "hadoop-common" % CDHVersions.Hadoop % Test classifier "tests"  excludeAll(
-      ExclusionRule(organization = "com.google.guava", "guava"))
-    val `hbase-tests` = "org.apache.hbase" % "hbase" % CDHVersions.Hbase % Test classifier "tests"  excludeAll(
-      ExclusionRule(organization = "com.google.guava", "guava"))
-    val `hadoop-hdfs-tests` = "org.apache.hadoop" % "hadoop-hdfs" % CDHVersions.Hadoop % Test classifier "tests"  excludeAll(
-      ExclusionRule(organization = "com.google.guava", "guava"))
-
     val `hbase-test-utils` = "org.apache.hbase" % "hbase-testing-util" % CDHVersions.Hbase % Test classifier "tests"  excludeAll(
       ExclusionRule(organization = "com.google.guava", "guava"))
   }

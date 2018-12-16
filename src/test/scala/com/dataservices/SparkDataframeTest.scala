@@ -19,7 +19,11 @@ class SparkDataframeTest extends  FunSuite with BeforeAndAfterAll with Matchers 
 
 
     val path = getClass.getClassLoader().getResource("LoanStats3a.csv").getPath
-    val loanStatsDataset = session.read.option("header", "true").option("inferSchema","true").csv(path)
+    val loanStatsDataset = session.read
+      .option("header", "true")
+      .option("inferSchema","true")
+      .option("timestampFormat", "yyyy-MM-dd'T'HH:mm:ss")
+      .csv(path)
     System.out.println("Printing DataFrame in readDataFromFile")
     val dataFrame = loanStatsDataset.toDF().groupBy("member_id").count()
     dataFrame.explain(extended = true)

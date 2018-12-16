@@ -3,6 +3,7 @@ import Settings._
 resolvers ++= Seq(
     "Cloudera repository" at "https://repository.cloudera.com/artifactory/cloudera-repos"
 )
+
 val `hbaseservice` = project
   .in(file("."))
   .enablePlugins(DeployApp, DockerPlugin)
