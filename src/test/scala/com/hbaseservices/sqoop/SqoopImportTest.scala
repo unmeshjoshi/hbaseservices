@@ -12,10 +12,10 @@ import org.apache.hadoop.fs.Path
 import org.hsqldb.Server
 import org.scalatest.{BeforeAndAfterAll, FunSuite}
 
-class SqoopImportTestBase extends FunSuite with BeforeAndAfterAll {
+abstract class SqoopImportTest extends FunSuite with BeforeAndAfterAll {
+  private val tempDir = "/tmp"
   val testHadoop = new TestHadoop(tempDir)
   val testDatabase = new TestDatabase(tempDir)
-  private val tempDir = "/tmp"
 
   override def beforeAll(): Unit = {
     testDatabase.start()

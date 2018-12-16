@@ -6,7 +6,7 @@ import com.cloudera.sqoop.SqoopOptions
 import com.cloudera.sqoop.SqoopOptions.FileLayout
 import org.apache.hadoop.mapred.JobConf
 
-class DataImporterTest extends SqoopImportTestBase {
+class DataImporterTest extends SqoopImportTest {
 
   test("should import from database to hadoop") {
     createTestData()
