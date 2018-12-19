@@ -91,19 +91,29 @@ object Hadoop {
 
 object Spark {
   val `spark-core` = "org.apache.spark" %% "spark-core" % CDHVersions.Spark % "provided"  excludeAll(
-    ExclusionRule(organization = "com.google.guava", "guava"))
+    ExclusionRule(organization = "com.google.guava", "guava"),
+    ExclusionRule(organization = "tomcat", "jasper-runtime")
+  )
 
   val `spark-sql` = "org.apache.spark" %% "spark-sql" % CDHVersions.Spark % "provided"  excludeAll(
-    ExclusionRule(organization = "com.google.guava", "guava"))
+    ExclusionRule(organization = "com.google.guava", "guava"),
+    ExclusionRule(organization = "tomcat", "jasper-runtime")
+  )
 
   val `avro` = "com.databricks" %% "spark-avro" % "4.0.0" % "provided"
   val `spark-catalyst-test` = "org.apache.spark" %% "spark-catalyst" % CDHVersions.Spark % "test" classifier "tests"  excludeAll(
-    ExclusionRule(organization = "com.google.guava", "guava"))
+    ExclusionRule(organization = "com.google.guava", "guava"),
+    ExclusionRule(organization = "tomcat", "jasper-runtime")
+  )
   val `spark-core-test` = "org.apache.spark" %% "spark-core" % CDHVersions.Spark % "test" classifier "tests"  excludeAll(
-    ExclusionRule(organization = "com.google.guava", "guava"))
+    ExclusionRule(organization = "com.google.guava", "guava"),
+    ExclusionRule(organization = "tomcat", "jasper-runtime"),
+  )
 
   val `spark-sql-test` = "org.apache.spark" %% "spark-sql" % CDHVersions.Spark % "test" classifier "tests"  excludeAll(
-    ExclusionRule(organization = "com.google.guava", "guava"))
+    ExclusionRule(organization = "com.google.guava", "guava"),
+    ExclusionRule(organization = "tomcat", "jasper-runtime")
+  )
 
   val `spark-avro` = "com.databricks" %% "spark-avro" % "4.0.0"
 
@@ -113,11 +123,13 @@ object Spark {
 object HBase {
 
   val `hbase-client` = "org.apache.hbase" % "hbase-client" % CDHVersions.Hbase % "provided" excludeAll(
-    ExclusionRule(organization = "com.google.guava", "guava"))
+    ExclusionRule(organization = "com.google.guava", "guava"),
+    ExclusionRule(organization = "tomcat", "jasper-runtime"))
 
   object TestOnly {
     val `hbase-test-utils` = "org.apache.hbase" % "hbase-testing-util" % CDHVersions.Hbase % Test classifier "tests"  excludeAll(
-      ExclusionRule(organization = "com.google.guava", "guava")
+      ExclusionRule(organization = "com.google.guava", "guava"),
+      ExclusionRule(organization = "tomcat", "jasper-runtime")
      )}
 }
 
