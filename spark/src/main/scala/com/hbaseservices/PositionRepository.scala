@@ -2,7 +2,6 @@ package com.hbaseservices
 
 import org.apache.hadoop.hbase.TableName
 import org.apache.hadoop.hbase.client._
-import org.apache.hadoop.hbase.filter.PrefixFilter
 import org.apache.hadoop.hbase.util.Bytes
 
 import scala.collection.JavaConversions._

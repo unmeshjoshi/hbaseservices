@@ -1,7 +1,7 @@
 package com.dataservices
 
 import org.apache.spark.SparkConf
-import org.apache.spark.sql.{RelationalGroupedDataset, SparkSession}
+import org.apache.spark.sql.SparkSession
 import org.scalatest.concurrent.Eventually
 import org.scalatest.{BeforeAndAfterAll, FunSuite, Matchers}
 
@@ -14,7 +14,6 @@ class SparkDataframeTest extends  FunSuite with BeforeAndAfterAll with Matchers 
     val session = SparkSession
       .builder
       .config(sparkConf).getOrCreate()
-    import org.apache.spark.SparkConf
     // Set Spark Configuration// Set Spark Configuration
 
 

@@ -85,6 +85,8 @@ object Hadoop {
     ExclusionRule(organization = "com.google.guava", "guava"))
   val `hadoop-core` = "org.apache.hadoop" % "hadoop-core" % CDHVersions.Hadoop % "provided"  excludeAll(
     ExclusionRule(organization = "com.google.guava", "guava"))
+  val `hadoop-mapreduce-client-core` = "org.apache.hadoop" % "hadoop-mapreduce-client-core" % CDHVersions.Hadoop % "provided"  excludeAll(
+    ExclusionRule(organization = "com.google.guava", "guava"))
 }
 
 object Spark {
@@ -115,8 +117,8 @@ object HBase {
 
   object TestOnly {
     val `hbase-test-utils` = "org.apache.hbase" % "hbase-testing-util" % CDHVersions.Hbase % Test classifier "tests"  excludeAll(
-      ExclusionRule(organization = "com.google.guava", "guava"))
-  }
+      ExclusionRule(organization = "com.google.guava", "guava")
+     )}
 }
 
 object Yaml {
