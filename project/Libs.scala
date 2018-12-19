@@ -124,12 +124,14 @@ object HBase {
 
   val `hbase-client` = "org.apache.hbase" % "hbase-client" % CDHVersions.Hbase % "provided" excludeAll(
     ExclusionRule(organization = "com.google.guava", "guava"),
-    ExclusionRule(organization = "tomcat", "jasper-runtime"))
+    ExclusionRule(organization = "tomcat", "jasper-runtime"),
+    ExclusionRule(organization = "org.apache.hadoop", "hadoop-core"))
 
   object TestOnly {
     val `hbase-test-utils` = "org.apache.hbase" % "hbase-testing-util" % CDHVersions.Hbase % Test classifier "tests"  excludeAll(
       ExclusionRule(organization = "com.google.guava", "guava"),
-      ExclusionRule(organization = "tomcat", "jasper-runtime")
+      ExclusionRule(organization = "tomcat", "jasper-runtime"),
+      ExclusionRule(organization = "org.apache.hadoop", "hadoop-core")
      )}
 }
 
