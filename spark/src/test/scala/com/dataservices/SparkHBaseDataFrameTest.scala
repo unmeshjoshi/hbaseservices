@@ -48,8 +48,7 @@ class SparkHBaseDataFrameTest extends FunSuite with BeforeAndAfterAll with Match
 
     //    writeToHBase(sc, sparkSession, conf)
     val dataFrame = new HBaseRepository().readFromHBase(sparkSession, conf)
-    println("Number of Records found : " + dataFrame.count())
-
+    assert(2 == dataFrame.count())
 
   }
 
