@@ -3,6 +3,7 @@ package com.dataservices
 import org.apache.hadoop.hbase.client._
 import org.apache.hadoop.hbase.util.Bytes
 import org.apache.hadoop.hbase.{HBaseTestingUtility, TableName}
+import org.apache.spark.sql.types.{DataTypes, Metadata, StructField, StructType}
 
 class PositionsTestDataGenerator(hbaseTestUtility: HBaseTestingUtility, val columnFamily: String = "cf", val tableName: String = "positions") {
 

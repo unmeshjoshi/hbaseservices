@@ -19,6 +19,7 @@ object Dependencies {
     Libs.`mockito-core` % Test,
     Libs.`scalatest` % Test,
     HBase.`hbase-client`,
+    HBase.`hbase-server`,
     HBase.TestOnly.`hbase-test-utils` ,
     Spark.`spark-core`,
     Spark.`spark-sql`,

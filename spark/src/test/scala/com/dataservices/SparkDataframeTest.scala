@@ -1,11 +1,15 @@
 package com.dataservices
 
+
+import org.apache.hadoop.hbase.client.Put
+import org.apache.hadoop.hbase.io.ImmutableBytesWritable
 import org.apache.spark.SparkConf
 import org.apache.spark.sql.SparkSession
 import org.scalatest.concurrent.Eventually
 import org.scalatest.{BeforeAndAfterAll, FunSuite, Matchers}
 
 class SparkDataframeTest extends  FunSuite with BeforeAndAfterAll with Matchers with Eventually {
+
 
   test("should load csv dataframe") {
     val sparkConf = new SparkConf().setAppName("spark-financial-analysis").setMaster("local[*]")
@@ -23,6 +27,7 @@ class SparkDataframeTest extends  FunSuite with BeforeAndAfterAll with Matchers 
       .option("inferSchema","true")
       .option("timestampFormat", "yyyy-MM-dd'T'HH:mm:ss")
       .csv(path)
+
     System.out.println("Printing DataFrame in readDataFromFile")
     val dataFrame = loanStatsDataset.toDF().groupBy("member_id").count()
     dataFrame.explain(extended = true)
@@ -36,6 +41,8 @@ class SparkDataframeTest extends  FunSuite with BeforeAndAfterAll with Matchers 
       }
       println()
     })
+
+
 
   }
 }
