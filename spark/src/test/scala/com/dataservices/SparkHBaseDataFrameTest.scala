@@ -2,17 +2,11 @@ package com.dataservices
 
 import com.hbaseservices.spark.HBaseRepository
 import org.apache.hadoop.conf.Configuration
-import org.apache.hadoop.hbase.client.{Put, Result}
-import org.apache.hadoop.hbase.io.ImmutableBytesWritable
-import org.apache.hadoop.hbase.mapred.TableOutputFormat
+import org.apache.hadoop.hbase.mapreduce.TableOutputFormat
 import org.apache.hadoop.hbase.mapreduce.TableInputFormat
-import org.apache.hadoop.hbase.util.Bytes
 import org.apache.hadoop.hbase.{HBaseConfiguration, HBaseTestingUtility, HConstants}
-import org.apache.spark.rdd.RDD
-import org.apache.spark.sql.catalyst.expressions.GenericRowWithSchema
-import org.apache.spark.sql.types._
-import org.apache.spark.sql.{Row, SparkSession}
-import org.apache.spark.{SparkConf, SparkContext}
+import org.apache.spark.SparkConf
+import org.apache.spark.sql.SparkSession
 import org.scalatest.concurrent.Eventually
 import org.scalatest.{BeforeAndAfterAll, FunSuite, Matchers}
 
@@ -21,54 +15,37 @@ class SparkHBaseDataFrameTest extends FunSuite with BeforeAndAfterAll with Match
   val hbaseTestUtility = newHbaseTestUtility
 
   val columnFamily: String = "cf"
+  val hbaseTableName = "positions"
 
   override def afterAll(): Unit = {
     hbaseTestUtility.shutdownMiniCluster()
   }
 
 
-
   override protected def beforeAll(): Unit = {
     hbaseTestUtility.startMiniCluster();
   }
 
-  test("should read hbase data with spark dataframe") {
+  test("should write and read hbase data with spark dataframe") {
     val sparkConf = new SparkConf().setAppName("HBaseDataframe").setMaster("local[*]")
-    val sc = new SparkContext(sparkConf)
     val sparkSession = SparkSession.builder().config(sparkConf).getOrCreate()
 
-    val positionGenerator = new PositionsTestDataGenerator(hbaseTestUtility, columnFamily).createTable()
+    val positionGenerator = new PositionsTestDataGenerator(hbaseTestUtility, columnFamily, hbaseTableName).createTable()
       .seedData("10100002899999", "19-Aug-14", "MONEYMAREKTMF")
-      .seedData("10100002899999", "19-Aug-15", "MONEYMAREKTMF")
-    positionGenerator
+      .seedData("10100002899999", "20-Aug-15", "MONEYMAREKTMF")
 
     val conf: Configuration = hbaseTestUtility.getConfiguration
-    conf.set(TableInputFormat.INPUT_TABLE, "positions")
-    conf.set(TableOutputFormat.OUTPUT_TABLE, "positions")
+    conf.set(TableInputFormat.INPUT_TABLE, hbaseTableName)
+    conf.set(TableOutputFormat.OUTPUT_TABLE, hbaseTableName)
+    conf.set("mapreduce.outputformat.class", "org.apache.hadoop.hbase.mapreduce.TableOutputFormat")
 
+    val hbaseRepository = new HBaseRepository(sparkSession, conf, columnFamily)
     //    writeToHBase(sc, sparkSession, conf)
-    val dataFrame = new HBaseRepository().readFromHBase(sparkSession, conf)
-    assert(2 == dataFrame.count())
+    hbaseRepository.writeToHBase("10100002899999", "21-Aug-15", "MONEYMAREKTMF")
 
-  }
+    val dataFrame = hbaseRepository.readFromHBase()
+    assert(dataFrame.count() == 3)
 
-  private def writeToHBase(sc: SparkContext, sparkSession: SparkSession, conf: Configuration) = {
-//    val someData = Seq(
-//      Row(8, "bat"),
-//      Row(64, "mouse"),
-//      Row(-27, "horse")
-//    )
-//
-//    val someSchema = List(
-//      StructField("number", IntegerType, true),
-//      StructField("word", StringType, true)
-//    )
-//
-//    val dataFrame = sparkSession(
-//      sc.parallelize(someData),
-//      StructType(someSchema)
-//    )
-//    dataFrame.rdd.map(row ⇒ (new ImmutableBytesWritable(), new Put())).saveAsNewAPIHadoopDataset(conf)
   }
 
   private def newHbaseTestUtility = {

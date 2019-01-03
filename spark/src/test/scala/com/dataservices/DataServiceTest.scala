@@ -19,7 +19,7 @@ class DataServiceTest extends FunSuite with BeforeAndAfterAll with Matchers with
 
 //
   test("should get list of positions for account key") {
-    new PositionsTestDataGenerator(hbaseTestUtility)
+    new PositionsTestDataGenerator(hbaseTestUtility, "cf", "positions")
       .createTable()
       .seedData("10100002899999", "19-Aug-14", "MONEYMAREKTMF")
 
