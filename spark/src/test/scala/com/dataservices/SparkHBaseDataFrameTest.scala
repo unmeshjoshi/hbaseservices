@@ -43,8 +43,8 @@ class SparkHBaseDataFrameTest extends FunSuite with BeforeAndAfterAll with Match
     //    writeToHBase(sc, sparkSession, conf)
     hbaseRepository.writeToHBase("10100002899999", "21-Aug-15", "MONEYMAREKTMF")
 
-    val dataFrame = hbaseRepository.readFromHBase()
-    assert(dataFrame.count() == 3)
+    val dataFrame = hbaseRepository.readFromHBase(Map(("alKey", "1000566819499")))
+    assert(dataFrame.count() == 1)
 
   }
 

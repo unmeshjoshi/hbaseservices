@@ -1,15 +1,18 @@
 package com.hbaseservices.spark
 
 import org.apache.hadoop.conf.Configuration
-import org.apache.hadoop.hbase.client.{Put, Result}
+import org.apache.hadoop.hbase.client.{Put, Result, Scan}
+import org.apache.hadoop.hbase.filter.CompareFilter.CompareOp
+import org.apache.hadoop.hbase.filter.{Filter, FilterList, SingleColumnValueFilter}
 import org.apache.hadoop.hbase.io.ImmutableBytesWritable
 import org.apache.hadoop.hbase.mapreduce.TableInputFormat
-import org.apache.hadoop.hbase.util.Bytes
+import org.apache.hadoop.hbase.protobuf.ProtobufUtil
+import org.apache.hadoop.hbase.util.{Base64, Bytes, ProtoUtil}
 import org.apache.spark.sql.catalyst.expressions.GenericRowWithSchema
 import org.apache.spark.sql.types._
 import org.apache.spark.sql.{Row, SparkSession}
 
-class HBaseRepository(sparkSession: SparkSession, @transient conf: Configuration, columnFamily:String) extends Serializable {
+class HBaseRepository(sparkSession: SparkSession, @transient conf: Configuration, columnFamily: String) extends Serializable {
   val hbaseSchema: StructType = StructType(List(StructField("egKey", DataTypes.StringType, true, Metadata.empty),
     StructField("alKey", DataTypes.StringType, true, Metadata.empty),
     StructField("nomCcyCd", DataTypes.StringType, true, Metadata.empty),
@@ -22,31 +25,49 @@ class HBaseRepository(sparkSession: SparkSession, @transient conf: Configuration
     StructField("nomAccrInterest", DataTypes.StringType, true, Metadata.empty),
     StructField("relationshipKey", DataTypes.StringType, true, Metadata.empty)))
 
-  def readFromHBase() = {
-    val hBaseRDD = sparkSession.sparkContext.newAPIHadoopRDD(conf, classOf[TableInputFormat], classOf[ImmutableBytesWritable], classOf[Result])
+  def readFromHBase(filterColumnValues:Map[String, Any]) = {
+    val hbaseConf = setScan(filterColumnValues, conf)
+    val hBaseRDD = sparkSession.sparkContext.newAPIHadoopRDD(hbaseConf, classOf[TableInputFormat], classOf[ImmutableBytesWritable], classOf[Result])
     val resultRDD = hBaseRDD.map(tuple ⇒ tuple._2)
     val rowRDD = resultRDD.map(result ⇒ {
-      def getRow(result: Result, schema: StructType, columnFamily: String): Row = {
-        val values = schema.fields.map(field ⇒ {
-          val dataType: DataType = field.dataType
-          val value = result.getValue(columnFamily.getBytes, field.name.getBytes)
-          dataType match {
-            case DataTypes.LongType ⇒ Bytes.toLong(value)
-            case DataTypes.StringType ⇒ Bytes.toString(value)
-          }
-        })
-        new GenericRowWithSchema(values, schema)
-      }
-
       getRow(result, hbaseSchema, columnFamily)
     })
     sparkSession.createDataFrame(rowRDD, hbaseSchema)
   }
 
+  def setScan(filterColumnValues:Map[String, Any], conf:Configuration): Configuration ={
+    val scan = new Scan()
+    scan.setCaching(100)
+    val filterList = new FilterList(FilterList.Operator.MUST_PASS_ALL)
+    filterColumnValues.foreach(tuple⇒ {
+      val valueBytes = tuple._2 match {
+        case str: String ⇒ Bytes.toBytes(str)
+        case number: Long ⇒ Bytes.toBytes(number)
+      }
+      filterList.addFilter(new SingleColumnValueFilter(Bytes.toBytes(columnFamily), Bytes.toBytes(tuple._1), CompareOp.EQUAL, valueBytes))
+    })
+    scan.setFilter(filterList)
+
+    val protobufScan = ProtobufUtil.toScan(scan)
+    conf.set(TableInputFormat.SCAN, Base64.encodeBytes(protobufScan.toByteArray))
+    conf
+  }
+
+  def getRow(result: Result, schema: StructType, columnFamily: String): Row = {
+    val values = schema.fields.map(field ⇒ {
+      val dataType: DataType = field.dataType
+      val value = result.getValue(columnFamily.getBytes, field.name.getBytes)
+      dataType match {
+        case DataTypes.LongType ⇒ Bytes.toLong(value)
+        case DataTypes.StringType ⇒ Bytes.toString(value)
+      }
+    })
+    new GenericRowWithSchema(values, schema)
+  }
 
   def writeToHBase(acctKey: String, valueAsOfDate: String, accetClassCd: String) = {
     val egKey = "10300000692192"
-    val alKey = "1000566819412"
+    val alKey = "1000566819499"
     val nomCcyCd = "USD"
     val refCcyCd = "USD"
     val marketUnitPriceAmount = "102.477"
