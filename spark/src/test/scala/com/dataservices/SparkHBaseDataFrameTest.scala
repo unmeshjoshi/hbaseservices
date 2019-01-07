@@ -39,7 +39,10 @@ class SparkHBaseDataFrameTest extends FunSuite with BeforeAndAfterAll with Match
     conf.set(TableOutputFormat.OUTPUT_TABLE, hbaseTableName)
     conf.set("mapreduce.outputformat.class", "org.apache.hadoop.hbase.mapreduce.TableOutputFormat")
 
-    val hbaseRepository = new HBaseRepository(sparkSession, conf, columnFamily)
+    val HBASE_CONFIGURATION_ZOOKEEPER_QUORUM = "hbase.zookeeper.quorum"
+    val HBASE_CONFIGURATION_ZOOKEEPER_CLIENTPORT = "hbase.zookeeper.property.clientPort"
+
+    val hbaseRepository = new HBaseRepository(sparkSession, conf, columnFamily, conf.get(HBASE_CONFIGURATION_ZOOKEEPER_QUORUM), conf.getInt(HBASE_CONFIGURATION_ZOOKEEPER_CLIENTPORT, 0), hbaseTableName)
     //    writeToHBase(sc, sparkSession, conf)
     hbaseRepository.writeToHBase("10100002899999", "21-Aug-15", "MONEYMAREKTMF")
 

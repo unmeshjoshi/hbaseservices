@@ -58,7 +58,10 @@ object Enumeratum {
 object Kafka {
   val `kafkaStreamsScala` = "com.lightbend" %% "kafka-streams-scala" % "0.1.0"
   val `akka-stream-kafka` = "com.typesafe.akka" %% "akka-stream-kafka" % "0.19"
-  val `scalatest-embedded-kafka` = "net.manub" %% "scalatest-embedded-kafka" % "1.1.0"
+  val `scalatest-embedded-kafka` = "net.manub" %% "scalatest-embedded-kafka" % "1.1.0" excludeAll(
+    ExclusionRule(organization = "com.google.guava", "guava"),
+    ExclusionRule(organization = "tomcat", "jasper-runtime")
+  )
 }
 
 object Sqoop {
@@ -87,9 +90,46 @@ object Hadoop {
     ExclusionRule(organization = "com.google.guava", "guava"))
   val `hadoop-mapreduce-client-core` = "org.apache.hadoop" % "hadoop-mapreduce-client-core" % CDHVersions.Hadoop % "provided"  excludeAll(
     ExclusionRule(organization = "com.google.guava", "guava"))
+  val `hadoop-yarn-tests` = "org.apache.hadoop" % "hadoop-yarn-server-tests" % CDHVersions.Hadoop classifier "tests" excludeAll(
+    ExclusionRule(organization = "com.google.guava", "guava"),
+    ExclusionRule(organization = "tomcat", "jasper-runtime")
+  )
+
 }
 
 object Spark {
+  val sparkStreaming = "org.apache.spark" %% "spark-streaming" % CDHVersions.Spark excludeAll(
+    ExclusionRule(organization = "org.pentaho", name="pentaho-aggdesigner-algorithm"),
+    ExclusionRule(organization = "eigenbase", name="eigenbase-properties"),
+    ExclusionRule(organization = "com.google.guava", "guava"),
+    ExclusionRule(organization = "tomcat", "jasper-runtime")
+  )
+  val sparkSQL = "org.apache.spark" %% "spark-sql" % CDHVersions.Spark excludeAll(
+    ExclusionRule(organization = "org.pentaho", name="pentaho-aggdesigner-algorithm"),
+    ExclusionRule(organization = "eigenbase", name="eigenbase-properties"),
+    ExclusionRule(organization = "com.google.guava", "guava"),
+    ExclusionRule(organization = "tomcat", "jasper-runtime")
+  )
+  val sparkHiveSQL = "org.apache.spark" %% "spark-hive" % CDHVersions.Spark excludeAll(
+    ExclusionRule(organization = "org.pentaho", name="pentaho-aggdesigner-algorithm"),
+    ExclusionRule(organization = "eigenbase", name="eigenbase-properties"),
+    ExclusionRule(organization = "com.google.guava", "guava"),
+    ExclusionRule(organization = "tomcat", "jasper-runtime")
+  )
+  val sparkTestingBase = "com.holdenkarau" %% "spark-testing-base" % "2.2.0_0.8.0" excludeAll(
+    ExclusionRule(organization = "com.google.guava", "guava"),
+    ExclusionRule(organization = "tomcat", "jasper-runtime")
+  )
+  //FIXME  val sparkRepl      = "org.apache.spark"  %% "spark-repl"      % Version
+  val sparkStreamingKafka = "org.apache.spark" %% "spark-streaming-kafka-0-10" % CDHVersions.Spark excludeAll(
+    ExclusionRule(organization = "com.google.guava", "guava"),
+    ExclusionRule(organization = "tomcat", "jasper-runtime")
+  )
+  val sparkStructuredStreamingKafka = "org.apache.spark" %% "spark-sql-kafka-0-10" % CDHVersions.Spark excludeAll(
+    ExclusionRule(organization = "com.google.guava", "guava"),
+    ExclusionRule(organization = "tomcat", "jasper-runtime")
+  )
+
   val `spark-core` = "org.apache.spark" %% "spark-core" % CDHVersions.Spark % "provided"  excludeAll(
     ExclusionRule(organization = "com.google.guava", "guava"),
     ExclusionRule(organization = "tomcat", "jasper-runtime")
@@ -115,7 +155,10 @@ object Spark {
     ExclusionRule(organization = "tomcat", "jasper-runtime")
   )
 
-  val `spark-avro` = "com.databricks" %% "spark-avro" % "4.0.0"
+  val `spark-avro` = "com.databricks" %% "spark-avro" % "4.0.0" excludeAll(
+    ExclusionRule(organization = "com.google.guava", "guava"),
+    ExclusionRule(organization = "tomcat", "jasper-runtime")
+  )
 
 }
 
