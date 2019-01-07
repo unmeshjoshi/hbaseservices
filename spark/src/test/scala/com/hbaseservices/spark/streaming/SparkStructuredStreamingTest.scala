@@ -1,9 +1,11 @@
 import java.util.{Properties, UUID}
 
 import com.dataservices.PositionsTestDataGenerator
+import com.gemfire.PositionCache
 import com.hbaseservices.spark.HBaseRepository
 import com.hbaseservices.spark.streaming.SparkStructuredStreaming
 import com.hbaseservices.util.Networks
+import com.test.gemfire.{TestGemfireCache, TestGemfireCacheProvider}
 import net.manub.embeddedkafka.{EmbeddedKafka, EmbeddedKafkaConfig}
 import org.apache.hadoop.conf.Configuration
 import org.apache.hadoop.hbase.client.Connection
@@ -64,12 +66,9 @@ class SparkStreamTest extends FunSuite with BeforeAndAfterAll with Matchers with
 
   test("should consume messages from spark") {
 
-
     produceTestMessagesSync("memberTopic")
 
-
     val conf: Configuration = hbaseTestUtility.getConfiguration
-    hbaseTestUtility.getConnection
 
     conf.set(TableInputFormat.INPUT_TABLE, hbaseTableName)
     conf.set(TableOutputFormat.OUTPUT_TABLE, hbaseTableName)
@@ -84,12 +83,15 @@ class SparkStreamTest extends FunSuite with BeforeAndAfterAll with Matchers with
       .appName(appName)
       .getOrCreate()
 
-    SparkStructuredStreaming.processStream(sparkSession, bootstrapServers, "memberTopic", conf, hbaseTableName)
+    SparkStructuredStreaming.processStream(new TestGemfireCache(), sparkSession, bootstrapServers, "memberTopic", conf, hbaseTableName)
 
     val HBASE_CONFIGURATION_ZOOKEEPER_QUORUM = "hbase.zookeeper.quorum"
     val HBASE_CONFIGURATION_ZOOKEEPER_CLIENTPORT = "hbase.zookeeper.property.clientPort"
 
+
     val hbaseRepository = new HBaseRepository(sparkSession, conf, columnFamily, conf.get(HBASE_CONFIGURATION_ZOOKEEPER_QUORUM), conf.getInt(HBASE_CONFIGURATION_ZOOKEEPER_CLIENTPORT, 0), hbaseTableName)
+
+
 
     Thread.sleep(5000)
 

@@ -1,16 +1,14 @@
 package com.hbaseservices.spark.streaming
 
+import com.gemfire.GemfireCacheProvider
 import com.hbaseservices.Position
-import com.hbaseservices.spark.HBaseRepository
 import org.apache.hadoop.conf.Configuration
 import org.apache.spark.sql.{DataFrame, Dataset, SparkSession}
-import org.apache.spark.sql.streaming.StreamingQuery
-import org.apache.hadoop.hbase.client.Connection
 
 
 object SparkStructuredStreaming extends Serializable {
 
-  def processStream(sparkSession:SparkSession, kafkaBootstrapServers: String, kafkaTopic: String, conf:Configuration, hbaseTableName:String) = {
+  def processStream(gemfireCacheProvider:GemfireCacheProvider, sparkSession: SparkSession, kafkaBootstrapServers: String, kafkaTopic: String, conf:Configuration, hbaseTableName:String) = {
 
     import sparkSession.implicits._
 
@@ -38,8 +36,10 @@ object SparkStructuredStreaming extends Serializable {
     val HBASE_CONFIGURATION_ZOOKEEPER_QUORUM = "hbase.zookeeper.quorum"
     val HBASE_CONFIGURATION_ZOOKEEPER_CLIENTPORT = "hbase.zookeeper.property.clientPort"
 
-    val writer = new HBaseWriter(sparkSession, conf, conf.get(HBASE_CONFIGURATION_ZOOKEEPER_QUORUM), conf.getInt(HBASE_CONFIGURATION_ZOOKEEPER_CLIENTPORT, 0), hbaseTableName)
+    val hbaseWriter = new HBaseWriter(sparkSession, conf, conf.get(HBASE_CONFIGURATION_ZOOKEEPER_QUORUM), conf.getInt(HBASE_CONFIGURATION_ZOOKEEPER_CLIENTPORT, 0), hbaseTableName)
+    val gemfireWriter = new GemfireWriter(sparkSession, gemfireCacheProvider)
 
-    val query: StreamingQuery = dataSet.writeStream.foreach(writer).start()
+    val hbaseStream = dataSet.writeStream.foreach(hbaseWriter).start()
+    val gemfireStream = dataSet.writeStream.foreach(hbaseWriter).start()
   }
 }
