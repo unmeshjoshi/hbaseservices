@@ -1,19 +1,32 @@
 package com.hbaseservices.spark
 
 import org.apache.hadoop.conf.Configuration
-import org.apache.hadoop.hbase.TableName
+import org.apache.hadoop.hbase.{HBaseConfiguration, TableName}
 import org.apache.hadoop.hbase.client.{Connection, Put, Result, Scan}
 import org.apache.hadoop.hbase.filter.CompareFilter.CompareOp
 import org.apache.hadoop.hbase.filter.{FilterList, SingleColumnValueFilter}
 import org.apache.hadoop.hbase.io.ImmutableBytesWritable
-import org.apache.hadoop.hbase.mapreduce.TableInputFormat
+import org.apache.hadoop.hbase.mapreduce.{TableInputFormat, TableOutputFormat}
 import org.apache.hadoop.hbase.protobuf.ProtobufUtil
 import org.apache.hadoop.hbase.util.{Base64, Bytes}
 import org.apache.spark.sql.catalyst.expressions.GenericRowWithSchema
 import org.apache.spark.sql.types._
-import org.apache.spark.sql.{Row, SparkSession}
+import org.apache.spark.sql.{DataFrame, Row, SparkSession}
 
-class HBaseRepository(sparkSession: SparkSession, @transient conf: Configuration, columnFamily: String, zookeeperQuorum:String, hbaseZookeeperClientPort:Int, tableName:String) extends Serializable {
+class HBaseRepository(sparkSession: SparkSession, columnFamily: String, zookeeperQuorum: String, hbaseZookeeperClientPort: Int, tableName: String) extends Serializable {
+  val HBASE_CONFIGURATION_ZOOKEEPER_QUORUM = "hbase.zookeeper.quorum"
+  val HBASE_CONFIGURATION_ZOOKEEPER_CLIENTPORT = "hbase.zookeeper.property.clientPort"
+
+  import org.apache.hadoop.hbase.HBaseConfiguration
+  import org.apache.hadoop.hbase.client.ConnectionFactory
+
+  @transient val conf = HBaseConfiguration.create()
+  conf.set(HBASE_CONFIGURATION_ZOOKEEPER_QUORUM, zookeeperQuorum)
+  conf.setInt(HBASE_CONFIGURATION_ZOOKEEPER_CLIENTPORT, hbaseZookeeperClientPort)
+  conf.set(TableInputFormat.INPUT_TABLE, tableName)
+  conf.set(TableOutputFormat.OUTPUT_TABLE, tableName)
+  conf.set("mapreduce.outputformat.class", "org.apache.hadoop.hbase.mapreduce.TableOutputFormat")
+
   val hbaseSchema: StructType = StructType(List(StructField("egKey", DataTypes.StringType, true, Metadata.empty),
     StructField("alKey", DataTypes.StringType, true, Metadata.empty),
     StructField("nomCcyCd", DataTypes.StringType, true, Metadata.empty),
@@ -81,8 +94,8 @@ class HBaseRepository(sparkSession: SparkSession, @transient conf: Configuration
     val rows: Seq[Row] = List(Row(egKey, alKey, nomCcyCd, refCcyCd, marketUnitPriceAmount, marketPriceDate, totalAmount, nomUnit, nomAmount, nomAccrInterest, relationshipKey))
 
 
-    val dataFrame = sparkSession.createDataFrame(sparkSession.sparkContext.parallelize(rows), hbaseSchema)
-    dataFrame.rdd.map(row ⇒ {
+    val dataFrame: DataFrame = sparkSession.createDataFrame(sparkSession.sparkContext.parallelize(rows), hbaseSchema)
+    dataFrame.rdd.map((row: Row) ⇒ {
       val put = new Put(Bytes.toBytes(s"${acctKey}-${valueAsOfDate}-${accetClassCd}"))
       hbaseSchema.fields.foreach(field ⇒ {
         put.addColumn(Bytes.toBytes(columnFamily), Bytes.toBytes(field.name), getValue(row, field))
@@ -126,17 +139,8 @@ class HBaseRepository(sparkSession: SparkSession, @transient conf: Configuration
     addColumn(p, columnFamily, "nomAccrInterest", nomAccrInterest)
     addColumn(p, columnFamily, "relationshipKey", relationshipKey)
 
-    val HBASE_CONFIGURATION_ZOOKEEPER_QUORUM = "hbase.zookeeper.quorum"
-    val HBASE_CONFIGURATION_ZOOKEEPER_CLIENTPORT = "hbase.zookeeper.property.clientPort"
 
-    import org.apache.hadoop.hbase.HBaseConfiguration
-    import org.apache.hadoop.hbase.client.ConnectionFactory
-
-    val hConf = HBaseConfiguration.create()
-    hConf.set(HBASE_CONFIGURATION_ZOOKEEPER_QUORUM, zookeeperQuorum)
-    hConf.setInt(HBASE_CONFIGURATION_ZOOKEEPER_CLIENTPORT, hbaseZookeeperClientPort)
-
-    val connection = ConnectionFactory.createConnection(hConf)
+    val connection = ConnectionFactory.createConnection(conf)
 
     val hbaseTable = connection.getTable(TableName.valueOf(tableName))
 
