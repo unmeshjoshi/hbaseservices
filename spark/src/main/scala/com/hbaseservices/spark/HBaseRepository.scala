@@ -13,7 +13,10 @@ import org.apache.spark.sql.catalyst.expressions.GenericRowWithSchema
 import org.apache.spark.sql.types._
 import org.apache.spark.sql.{DataFrame, Row, SparkSession}
 
-class HBaseRepository(sparkSession: SparkSession, columnFamily: String, zookeeperQuorum: String, hbaseZookeeperClientPort: Int, tableName: String) extends Serializable {
+
+class HBaseRepository(sparkSession: SparkSession, zookeeperQuorum: HbaseConnectionProperties) extends Serializable {
+  val columnFamily = "cf"
+  val tableName = "Positions"
   val HBASE_CONFIGURATION_ZOOKEEPER_QUORUM = "hbase.zookeeper.quorum"
   val HBASE_CONFIGURATION_ZOOKEEPER_CLIENTPORT = "hbase.zookeeper.property.clientPort"
 
@@ -21,8 +24,8 @@ class HBaseRepository(sparkSession: SparkSession, columnFamily: String, zookeepe
   import org.apache.hadoop.hbase.client.ConnectionFactory
 
   @transient val conf = HBaseConfiguration.create()
-  conf.set(HBASE_CONFIGURATION_ZOOKEEPER_QUORUM, zookeeperQuorum)
-  conf.setInt(HBASE_CONFIGURATION_ZOOKEEPER_CLIENTPORT, hbaseZookeeperClientPort)
+  conf.set(HBASE_CONFIGURATION_ZOOKEEPER_QUORUM, zookeeperQuorum.zookeerQuorum)
+  conf.setInt(HBASE_CONFIGURATION_ZOOKEEPER_CLIENTPORT, zookeeperQuorum.zookeeperClientPort)
   conf.set(TableInputFormat.INPUT_TABLE, tableName)
   conf.set(TableOutputFormat.OUTPUT_TABLE, tableName)
   conf.set("mapreduce.outputformat.class", "org.apache.hadoop.hbase.mapreduce.TableOutputFormat")

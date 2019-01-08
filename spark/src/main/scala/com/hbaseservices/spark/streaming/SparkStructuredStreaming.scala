@@ -2,13 +2,13 @@ package com.hbaseservices.spark.streaming
 
 import com.gemfire.GemfireCacheProvider
 import com.hbaseservices.Position
-import org.apache.hadoop.conf.Configuration
+import com.hbaseservices.spark.HbaseConnectionProperties
 import org.apache.spark.sql.{DataFrame, Dataset, SparkSession}
 
 
 object SparkStructuredStreaming extends Serializable {
 
-  def processStream(gemfireCacheProvider:GemfireCacheProvider, sparkSession: SparkSession, kafkaBootstrapServers: String, zookeeperQuorum: String, hbaseZookeeperClientPort: Int, kafkaTopic: String, hbaseTableName:String) = {
+  def processStream(gemfireCacheProvider:GemfireCacheProvider, sparkSession: SparkSession, kafkaBootstrapServers: String, zookeeperConnection: HbaseConnectionProperties, kafkaTopic: String) = {
 
     import sparkSession.implicits._
 
@@ -33,7 +33,7 @@ object SparkStructuredStreaming extends Serializable {
       .map((row) ⇒ new Position("10100002899999", egKey, marketUnitPriceAmount, marketPriceDate))
 
 
-    val hbaseWriter = new HBaseWriter(sparkSession, zookeeperQuorum, hbaseZookeeperClientPort, hbaseTableName)
+    val hbaseWriter = new PositionHBaseWriter(sparkSession, zookeeperConnection)
     val gemfireWriter = new GemfireWriter(sparkSession, gemfireCacheProvider)
 
     val hbaseStream = dataSet.writeStream.foreach(hbaseWriter).start()

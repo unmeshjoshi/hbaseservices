@@ -4,7 +4,7 @@ import org.apache.hadoop.hbase.client._
 import org.apache.hadoop.hbase.util.Bytes
 import org.apache.hadoop.hbase.{HBaseTestingUtility, TableName}
 
-class PositionsTestDataGenerator(hbaseTestUtility: HBaseTestingUtility, val columnFamily: String, val tableName: String) {
+class PositionsTestDataGenerator(hbaseTestUtility: HBaseTestingUtility, val columnFamily: String = "cf", val tableName: String = "Positions") {
 
   def seedData(acctKey: String, valueAsOfDate: String, assetClassCode: String) = {
     putRow(acctKey, valueAsOfDate, assetClassCode)

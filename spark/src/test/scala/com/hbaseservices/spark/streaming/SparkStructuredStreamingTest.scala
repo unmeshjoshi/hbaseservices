@@ -1,5 +1,5 @@
 import com.dataservices.PositionsTestDataGenerator
-import com.hbaseservices.spark.HBaseRepository
+import com.hbaseservices.spark.{HBaseRepository, HbaseConnectionProperties}
 import com.hbaseservices.spark.streaming.{DataPipelineTestBase, SparkStructuredStreaming}
 import com.test.gemfire.TestGemfireCache
 import org.apache.hadoop.conf.Configuration
@@ -10,19 +10,16 @@ import org.apache.spark.sql.SparkSession
 
 
 class SparkStreamTest extends DataPipelineTestBase {
-  val columnFamily: String = "cf"
-  val hbaseTableName = "positions"
-
   override protected def beforeAll() = {
     super.beforeAll()
-    new PositionsTestDataGenerator(hbaseTestUtility, columnFamily, hbaseTableName).createTable()
+    new PositionsTestDataGenerator(hbaseTestUtility).createTable()
   }
 
   test("should consume messages from spark") {
 
     produceTestMessagesSync("memberTopic")
 
-    val conf: Configuration = hbaseConfiguration()
+    val conf: Configuration = hbaseTestUtility.getConfiguration
 
     val appName = "StructuredKafkaProcessing"
     val sparkConf = new SparkConf().setAppName(appName).setMaster("local")
@@ -33,30 +30,17 @@ class SparkStreamTest extends DataPipelineTestBase {
       .appName(appName)
       .getOrCreate()
 
-
-    val HBASE_CONFIGURATION_ZOOKEEPER_QUORUM = "hbase.zookeeper.quorum"
-    val HBASE_CONFIGURATION_ZOOKEEPER_CLIENTPORT = "hbase.zookeeper.property.clientPort"
-    val hbaseZookeeperQuorum = conf.get(HBASE_CONFIGURATION_ZOOKEEPER_QUORUM)
-    val hbaseZookeerClientPort = conf.getInt(HBASE_CONFIGURATION_ZOOKEEPER_CLIENTPORT, 0)
-
     val gemfireCache = new TestGemfireCache()
-    SparkStructuredStreaming.processStream(gemfireCache, sparkSession, bootstrapServers, hbaseZookeeperQuorum, hbaseZookeerClientPort, "memberTopic", hbaseTableName)
 
-    val hbaseRepository = new HBaseRepository(sparkSession, columnFamily, hbaseZookeeperQuorum, hbaseZookeerClientPort, hbaseTableName)
+    SparkStructuredStreaming.processStream(gemfireCache, sparkSession, bootstrapServers, HbaseConnectionProperties(conf), "memberTopic")
+
+    val hbaseRepository = new HBaseRepository(sparkSession, HbaseConnectionProperties(conf))
 
     eventually {
       val dataFrame = hbaseRepository.readFromHBase(Map(("alKey", "1000566819412")))
       assert(dataFrame.count() == 1)
     }
 
-  }
-
-  private def hbaseConfiguration ()= {
-    val conf: Configuration = hbaseTestUtility.getConfiguration
-    conf.set(TableInputFormat.INPUT_TABLE, hbaseTableName)
-    conf.set(TableOutputFormat.OUTPUT_TABLE, hbaseTableName)
-    conf.set("mapreduce.outputformat.class", "org.apache.hadoop.hbase.mapreduce.TableOutputFormat")
-    conf
   }
 
   private def produceTestMessagesSync(topic: String) = {
