@@ -4,7 +4,7 @@ import org.apache.hadoop.conf.Configuration
 import org.apache.hadoop.hbase.{HBaseConfiguration, TableName}
 import org.apache.hadoop.hbase.client.{Connection, Put, Result, Scan}
 import org.apache.hadoop.hbase.filter.CompareFilter.CompareOp
-import org.apache.hadoop.hbase.filter.{FilterList, SingleColumnValueFilter}
+import org.apache.hadoop.hbase.filter.{FilterList, KeyOnlyFilter, PrefixFilter, SingleColumnValueFilter}
 import org.apache.hadoop.hbase.io.ImmutableBytesWritable
 import org.apache.hadoop.hbase.mapreduce.{TableInputFormat, TableOutputFormat}
 import org.apache.hadoop.hbase.protobuf.ProtobufUtil
@@ -30,20 +30,24 @@ class HBaseRepository(sparkSession: SparkSession, zookeeperQuorum: HbaseConnecti
   conf.set(TableOutputFormat.OUTPUT_TABLE, tableName)
   conf.set("mapreduce.outputformat.class", "org.apache.hadoop.hbase.mapreduce.TableOutputFormat")
 
-  val hbaseSchema: StructType = StructType(List(StructField("egKey", DataTypes.StringType, true, Metadata.empty),
-    StructField("alKey", DataTypes.StringType, true, Metadata.empty),
-    StructField("nomCcyCd", DataTypes.StringType, true, Metadata.empty),
-    StructField("refCcyCd", DataTypes.StringType, true, Metadata.empty),
-    StructField("marketUnitPriceAmount", DataTypes.StringType, true, Metadata.empty),
-    StructField("marketPriceDate", DataTypes.StringType, true, Metadata.empty),
-    StructField("totalAmount", DataTypes.StringType, true, Metadata.empty),
-    StructField("nomUnit", DataTypes.StringType, true, Metadata.empty),
-    StructField("nomAmount", DataTypes.StringType, true, Metadata.empty),
-    StructField("nomAccrInterest", DataTypes.StringType, true, Metadata.empty),
-    StructField("relationshipKey", DataTypes.StringType, true, Metadata.empty)))
+  val hbaseSchema: StructType = StructType(List(StructField("balance", DataTypes.StringType, true, Metadata.empty)))
 
   def readFromHBase(filterColumnValues:Map[String, Any]) = {
     val hbaseConf = setScan(filterColumnValues, conf)
+    val hBaseRDD = sparkSession.sparkContext.newAPIHadoopRDD(hbaseConf, classOf[TableInputFormat], classOf[ImmutableBytesWritable], classOf[Result])
+    val resultRDD = hBaseRDD.map(tuple ⇒ tuple._2)
+    val rowRDD = resultRDD.map(result ⇒ {
+      getRow(result, hbaseSchema, columnFamily)
+    })
+    sparkSession.createDataFrame(rowRDD, hbaseSchema)
+  }
+
+  def readFromHBase(keyPrefix:String) = {
+    val scan = new Scan()
+    scan.setCaching(100)
+    scan.setMaxVersions()
+    scan.setFilter(new PrefixFilter(Bytes.toBytes(keyPrefix)))
+    val hbaseConf = setScan(conf, scan)
     val hBaseRDD = sparkSession.sparkContext.newAPIHadoopRDD(hbaseConf, classOf[TableInputFormat], classOf[ImmutableBytesWritable], classOf[Result])
     val resultRDD = hBaseRDD.map(tuple ⇒ tuple._2)
     val rowRDD = resultRDD.map(result ⇒ {
@@ -65,6 +69,10 @@ class HBaseRepository(sparkSession: SparkSession, zookeeperQuorum: HbaseConnecti
     })
     scan.setFilter(filterList)
 
+    setScan(conf, scan)
+  }
+
+  private def setScan(conf: Configuration, scan: Scan) = {
     val protobufScan = ProtobufUtil.toScan(scan)
     conf.set(TableInputFormat.SCAN, Base64.encodeBytes(protobufScan.toByteArray))
     conf
@@ -82,24 +90,13 @@ class HBaseRepository(sparkSession: SparkSession, zookeeperQuorum: HbaseConnecti
     new GenericRowWithSchema(values, schema)
   }
 
-  def writeToHBase(acctKey: String, valueAsOfDate: String, accetClassCd: String) = {
-    val egKey = "10300000692192"
-    val alKey = "1000566819499"
-    val nomCcyCd = "USD"
-    val refCcyCd = "USD"
-    val marketUnitPriceAmount = "102.477"
-    val marketPriceDate = "19-Aug-14"
-    val totalAmount = "1739764.00"
-    val nomUnit = "1695000"
-    val nomAmount = "1736985"
-    val nomAccrInterest = "2783"
-    val relationshipKey = "10500000746112"
-    val rows: Seq[Row] = List(Row(egKey, alKey, nomCcyCd, refCcyCd, marketUnitPriceAmount, marketPriceDate, totalAmount, nomUnit, nomAmount, nomAccrInterest, relationshipKey))
+  def writeToHBase(acctKey: String, valueAsOfDate: String, balance: String) = {
+    val rows: Seq[Row] = List(Row(balance))
 
 
     val dataFrame: DataFrame = sparkSession.createDataFrame(sparkSession.sparkContext.parallelize(rows), hbaseSchema)
     dataFrame.rdd.map((row: Row) ⇒ {
-      val put = new Put(Bytes.toBytes(s"${acctKey}-${valueAsOfDate}-${accetClassCd}"))
+      val put = new Put(Bytes.toBytes(s"${acctKey}-${valueAsOfDate}"))
       hbaseSchema.fields.foreach(field ⇒ {
         put.addColumn(Bytes.toBytes(columnFamily), Bytes.toBytes(field.name), getValue(row, field))
       })
@@ -115,39 +112,16 @@ class HBaseRepository(sparkSession: SparkSession, zookeeperQuorum: HbaseConnecti
     }
   }
 
-  def putRow(acctKey: String, valueAsOfDate: String, accetClassCd: String) = {
-    val relationshipKey = "10500000746112"
-    val egKey = "10300000692192"
-    val alKey = "1000566819412"
-    val nomCcyCd = "USD"
-    val refCcyCd = "USD"
-    val marketUnitPriceAmount = "102.477"
-    val marketPriceDate = "19-Aug-14"
-    val totalAmount = "1739764.00"
-    val nomUnit = "1695000"
-    val nomAmount = "1736985"
-    val nomAccrInterest = "2783"
+  def putRow(acctKey: String, valueAsOfDate: String, balance: String) = {
 
-
-    val p = new Put(Bytes.toBytes(s"${acctKey}-${valueAsOfDate}-${accetClassCd}"))
-    addColumn(p, columnFamily, "egKey", egKey)
-    addColumn(p, columnFamily, "alKey", alKey)
-    addColumn(p, columnFamily, "nomCcyCd", nomCcyCd)
-    addColumn(p, columnFamily, "refCcyCd", refCcyCd)
-    addColumn(p, columnFamily, "marketUnitPriceAmount", marketUnitPriceAmount)
-    addColumn(p, columnFamily, "marketPriceDate", marketPriceDate)
-    addColumn(p, columnFamily, "totalAmount", totalAmount)
-    addColumn(p, columnFamily, "nomUnit", nomUnit)
-    addColumn(p, columnFamily, "nomAmount", nomAmount)
-    addColumn(p, columnFamily, "nomAccrInterest", nomAccrInterest)
-    addColumn(p, columnFamily, "relationshipKey", relationshipKey)
-
+    val p = new Put(Bytes.toBytes(s"${acctKey}-${valueAsOfDate}"))
+    addColumn(p, columnFamily, "balance", balance)
 
     val connection = ConnectionFactory.createConnection(conf)
 
     val hbaseTable = connection.getTable(TableName.valueOf(tableName))
-
     hbaseTable.put(p)
+    hbaseTable.close()
   }
 
   def addColumn(p: Put, columnFamily: String, columnName: String, columnValue: String) = {

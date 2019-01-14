@@ -1,14 +1,14 @@
 package com.gemfire
 
-import com.hbaseservices.Position
+import com.hbaseservices.AccountPosition
 import org.apache.geode.cache.{GemFireCache, Region}
 
 class PositionCache(val
                     cacheProvider: GemfireCacheProvider) {
 
-  val positionRegion: Region[String, Position] = cacheProvider.getCache().getRegion("Positions")
+  val positionRegion: Region[String, AccountPosition] = cacheProvider.getCache().getRegion("Positions")
 
-  def add(position: Position) = {
+  def add(position: AccountPosition) = {
     positionRegion.put(position.key, position)
   }
 

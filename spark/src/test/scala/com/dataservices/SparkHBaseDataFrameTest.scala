@@ -13,15 +13,15 @@ class SparkHBaseDataFrameTest extends DataPipelineTestBase {
     val sparkConf = new SparkConf().setAppName("HBaseDataframe").setMaster("local[*]")
     val sparkSession = SparkSession.builder().config(sparkConf).getOrCreate()
 
-    val positionGenerator = new PositionsTestDataGenerator(hbaseTestUtility).createTable()
-      .seedData("10100002899999", "19-Ago getug-14", "MONEYMAREKTMF")
-      .seedData("10100002899999", "20-Aug-15", "MONEYMAREKTMF")
+    val positionGenerator = new AccountPositionTestDataGenerator(hbaseTestUtility).createTable()
+          .seedData("10100002899999", "19-Aug-14", "100")
+          .seedData("10100002899999", "20-Aug-15", "110")
 
     val conf: Configuration = hbaseTestUtility.getConfiguration
     val hbaseRepository = new HBaseRepository(sparkSession, HbaseConnectionProperties(conf))
-    hbaseRepository.writeToHBase("10100002899999", "21-Aug-15", "MONEYMAREKTMF")
+    hbaseRepository.writeToHBase("10100002899999", "21-Aug-15", "120")
 
-    val dataFrame = hbaseRepository.readFromHBase(Map(("alKey", "1000566819499")))
+    val dataFrame = hbaseRepository.readFromHBase(Map(("balance", "120")))
     assert(dataFrame.count() == 1)
 
   }

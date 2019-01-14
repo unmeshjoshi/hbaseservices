@@ -13,6 +13,7 @@ addSbtPlugin("com.typesafe.sbt"                  % "sbt-native-packager"    % "1
 addSbtPlugin("com.typesafe.sbt"                  % "sbt-multi-jvm"          % "0.4.0")
 addSbtPlugin("com.eed3si9n"                      % "sbt-buildinfo"          % "0.7.0")
 addSbtPlugin("pl.project13.scala"                % "sbt-jmh"                % "0.2.27")
+addSbtPlugin("net.virtual-void" % "sbt-dependency-graph" % "0.9.2")
 
 classpathTypes += "maven-plugin"
 

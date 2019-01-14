@@ -1,6 +1,6 @@
 package com.dataservices
 
-import com.hbaseservices.PositionRepository
+import com.hbaseservices.AccountPositionRepository
 import org.apache.hadoop.conf.Configuration
 import org.apache.hadoop.hbase.{HBaseConfiguration, HBaseTestingUtility, HConstants}
 import org.scalatest.concurrent.Eventually
@@ -19,15 +19,32 @@ class DataServiceTest extends FunSuite with BeforeAndAfterAll with Matchers with
 
 //
   test("should get list of positions for account key") {
-    new PositionsTestDataGenerator(hbaseTestUtility, "cf", "positions")
-      .createTable()
-      .seedData("10100002899999", "19-Aug-14", "MONEYMAREKTMF")
+    new AccountPositionTestDataGenerator(hbaseTestUtility, "cf", "Positions")
+          .createTable()
+          .seedData("10100002899999", "19-Aug-14", "100")
 
     val c = hbaseTestUtility.getConnection
 
-    val positions = new PositionRepository(c).getPositionsFor("10100002899999")
+    val positions = new AccountPositionRepository(c).getPositionsFor("10100002899999")
 
     assert(positions.size == 1)
+    assert(positions(0).acctKey == "10100002899999")
+  }
+
+
+  test("should get specific version of position") {
+    val generator = new AccountPositionTestDataGenerator(hbaseTestUtility, "cf", "Positions")
+      .createTable()
+    val t1 = generator
+          .seedData("10100002899999", "19-Aug-14", "100")
+    generator
+          .seedData("10100002899999", "19-Aug-14", "100")
+
+    val c = hbaseTestUtility.getConnection
+
+    val positions = new AccountPositionRepository(c).getPositionsFor("10100002899999")
+
+    assert(positions.size == 2)
     assert(positions(0).acctKey == "10100002899999")
   }
 //

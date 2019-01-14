@@ -1,21 +1,23 @@
-import com.dataservices.PositionsTestDataGenerator
-import com.hbaseservices.spark.{HBaseRepository, HbaseConnectionProperties}
+import com.dataservices.AccountPositionTestDataGenerator
 import com.hbaseservices.spark.streaming.{DataPipelineTestBase, SparkStructuredStreaming}
+import com.hbaseservices.spark.{HBaseRepository, HbaseConnectionProperties}
 import com.test.gemfire.TestGemfireCache
 import org.apache.hadoop.conf.Configuration
-import org.apache.hadoop.hbase.mapreduce.{TableInputFormat, TableOutputFormat}
 import org.apache.kafka.clients.producer.ProducerRecord
 import org.apache.spark.SparkConf
 import org.apache.spark.sql.SparkSession
 
 
 class SparkStreamTest extends DataPipelineTestBase {
+  val positionsTestDataGenerator = new AccountPositionTestDataGenerator(hbaseTestUtility)
   override protected def beforeAll() = {
     super.beforeAll()
-    new PositionsTestDataGenerator(hbaseTestUtility).createTable()
+    positionsTestDataGenerator.createTable()
   }
 
   test("should consume messages from spark") {
+
+    positionsTestDataGenerator.seedData("10100002899999", "19-Aug-14", "100")
 
     produceTestMessagesSync("memberTopic")
 
@@ -37,7 +39,7 @@ class SparkStreamTest extends DataPipelineTestBase {
     val hbaseRepository = new HBaseRepository(sparkSession, HbaseConnectionProperties(conf))
 
     eventually {
-      val dataFrame = hbaseRepository.readFromHBase(Map(("alKey", "1000566819412")))
+      val dataFrame = hbaseRepository.readFromHBase("10100002899999")
       assert(dataFrame.count() == 1)
     }
 
