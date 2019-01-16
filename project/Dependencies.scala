@@ -37,6 +37,7 @@ object Dependencies {
     //    Kafka.`akka-stream-kafka`,
     //    Kafka.`kafkaStreamsScala`,
     Kafka.`scalatest-embedded-kafka` % Test,
-    Libs.`geode`
+    Libs.`geode`,
+    Libs.`xstream`
   )
 }

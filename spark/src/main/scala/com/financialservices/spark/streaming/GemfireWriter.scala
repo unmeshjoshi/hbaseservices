@@ -1,7 +1,7 @@
-package com.hbaseservices.spark.streaming
+package com.financialservices.spark.streaming
 
 import com.gemfire.{GemfireCacheProvider, PositionCache}
-import com.hbaseservices.AccountPosition
+import com.financialservices.AccountPosition
 import org.apache.spark.sql.{ForeachWriter, SparkSession}
 
 

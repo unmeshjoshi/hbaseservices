@@ -36,15 +36,18 @@ object Libs {
   val `enumeration` = "com.beachape" %% "enumeratum" % "1.5.13"
   val `scalaop` = "org.rogach" %% "scallop" % "3.1.4"
 
-  val `geode` = "org.apache.geode" % "geode-core" % "1.6.0"
+  val `geode` = "org.apache.geode" % "geode-core" % "1.6.0" excludeAll(
+    ExclusionRule(organization = "org.mortbay.jetty", name="jetty")
+    )
   val `hsqldb` = "org.hsqldb" % "hsqldb" % "1.8.0.10"  //2.4.1 gives connection error with no username/password
 
   val `avro-mapred-hadoop2` = "org.apache.avro" % "avro-mapred" % "1.7.7" classifier "hadoop2"
   val `scala-logging` = "com.typesafe.scala-logging" %% "scala-logging" % "3.7.2"
   val `logback` = "ch.qos.logback" % "logback-classic" % "1.2.3"
   val `logback-json-encoder` = "net.logstash.logback" % "logstash-logback-encoder" % "4.11" excludeAll ExclusionRule(
-    organization = "com.fasterxml.jackson.core"
-  )
+    organization = "com.fasterxml.jackson.core")
+  val `xstream` = "xstream" % "xstream" % "1.2.2"
+
 }
 
 
@@ -67,9 +70,13 @@ object Kafka {
 object Sqoop {
   val `sqoop` = "org.apache.sqoop" % "sqoop" % CDHVersions.Sqoop % "provided" excludeAll(
     ExclusionRule(organization = "org.pentaho", name="pentaho-aggdesigner-algorithm"),
+    ExclusionRule(organization = "org.mortbay.jetty", name="jetty"),
+    ExclusionRule(organization = "org.mortbay.jetty", name="jsp-2.1"),
     ExclusionRule(organization = "eigenbase", name="eigenbase-properties"),
     ExclusionRule(organization = "com.google.guava", "guava"))
-  val `kite-data-mapreduce` = "org.kitesdk" % "kite-data-mapreduce" % CDHVersions.`kite-data-mapreduce` % "provided"
+  val `kite-data-mapreduce` = "org.kitesdk" % "kite-data-mapreduce" % CDHVersions.`kite-data-mapreduce` % "provided" excludeAll(
+    ExclusionRule(organization = "org.mortbay.jetty", name="jetty")
+    )
 }
 
 object Oracle {

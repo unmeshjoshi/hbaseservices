@@ -1,4 +1,4 @@
-package com.hbaseservices.spark
+package com.financialservices.spark
 
 import org.apache.hadoop.conf.Configuration
 

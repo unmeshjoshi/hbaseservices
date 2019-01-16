@@ -14,6 +14,7 @@ lazy val `sqoop` = project
 
 lazy val `spark` = project
   .enablePlugins(DeployApp, DockerPlugin)
+  .dependsOn(`sqoop`)
   .settings(defaultSettings: _*)
   .settings(
       //for spark which depends on specific json version
@@ -21,7 +22,8 @@ lazy val `spark` = project
       dependencyOverrides += "com.fasterxml.jackson.core" % "jackson-databind" % "2.8.7",
       dependencyOverrides += "com.fasterxml.jackson.module" % "jackson-module-scala_2.11" % "2.8.7",
 
-      libraryDependencies ++= Dependencies.SparkDependencies
+      libraryDependencies ++= Dependencies.SparkDependencies,
+      libraryDependencies ++= Dependencies.SqoopDependencies
   )
 
 val `hbaseservice` = project

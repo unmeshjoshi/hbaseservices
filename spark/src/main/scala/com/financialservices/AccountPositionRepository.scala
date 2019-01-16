@@ -1,4 +1,4 @@
-package com.hbaseservices
+package com.financialservices
 
 import org.apache.hadoop.hbase.TableName
 import org.apache.hadoop.hbase.client._

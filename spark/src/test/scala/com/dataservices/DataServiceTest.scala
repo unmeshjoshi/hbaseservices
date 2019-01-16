@@ -1,6 +1,6 @@
 package com.dataservices
 
-import com.hbaseservices.AccountPositionRepository
+import com.financialservices.AccountPositionRepository
 import org.apache.hadoop.conf.Configuration
 import org.apache.hadoop.hbase.{HBaseConfiguration, HBaseTestingUtility, HConstants}
 import org.scalatest.concurrent.Eventually
@@ -16,6 +16,8 @@ class DataServiceTest extends FunSuite with BeforeAndAfterAll with Matchers with
   override def afterAll(): Unit = {
     hbaseTestUtility.shutdownMiniCluster()
   }
+
+
 
 //
   test("should get list of positions for account key") {

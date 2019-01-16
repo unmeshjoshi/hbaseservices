@@ -1,14 +1,16 @@
-package com.hbaseservices.sqoop
+package com.financialservices.sqoop
 
 import java.util
 
 import com.cloudera.sqoop.SqoopOptions
 import com.cloudera.sqoop.SqoopOptions.FileLayout
+import com.hbaseservices.sqoop.BaseSqoopTest
 import org.apache.hadoop.mapred.JobConf
 
 class SqoopImportTest extends BaseSqoopTest {
 
   test("should import from database to hadoop") {
+
     createTestData()
 
     new DataImporter().importData(buildSqoopOptions("employees",
@@ -51,6 +53,8 @@ class SqoopImportTest extends BaseSqoopTest {
     options.setDeleteMode(false)
     options.setAppendMode(true)
     options.setClassName("test")
+    options.setCodeOutputDir("/tmp")
+//    options.set
     options.setCustomToolOptions(new util.HashMap[String, String]()) //need to set or else get NPE
     options
   }

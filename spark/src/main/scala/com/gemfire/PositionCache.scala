@@ -1,6 +1,6 @@
 package com.gemfire
 
-import com.hbaseservices.AccountPosition
+import com.financialservices.AccountPosition
 import org.apache.geode.cache.{GemFireCache, Region}
 
 class PositionCache(val

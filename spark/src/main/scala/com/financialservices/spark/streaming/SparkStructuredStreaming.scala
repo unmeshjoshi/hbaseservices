@@ -1,9 +1,11 @@
-package com.hbaseservices.spark.streaming
+package com.financialservices.spark.streaming
 
 import com.gemfire.GemfireCacheProvider
-import com.hbaseservices.AccountPosition
-import com.hbaseservices.spark.HbaseConnectionProperties
+import com.financialservices.AccountPosition
+import com.financialservices.spark.HbaseConnectionProperties
+import com.financialservices.spark.streaming.messages.Account
 import org.apache.spark.sql.{DataFrame, Dataset, SparkSession}
+
 
 
 object SparkStructuredStreaming extends Serializable {
@@ -17,7 +19,15 @@ object SparkStructuredStreaming extends Serializable {
 
     import sparkSession.implicits._
     val dataSet: Dataset[AccountPosition] = frame
-      .map((row) ⇒ new AccountPosition("10100002899999", balance, date))
+      .map(row ⇒ {
+        val xmlMessage = row.getAs[String](1)
+        import com.thoughtworks.xstream.XStream
+        import com.thoughtworks.xstream.io.xml.StaxDriver
+        val xstream = new XStream(new StaxDriver)
+        xstream.alias("account", classOf[Account])
+        val accountMessage = xstream.fromXML(xmlMessage).asInstanceOf[Account]
+        new AccountPosition(accountMessage.accountKey, accountMessage.amount, accountMessage.date)
+      })
 
 
     val hbaseWriter = new PositionHBaseWriter(sparkSession, zookeeperConnection)

@@ -1,7 +1,7 @@
 package com.dataservices
 
-import com.hbaseservices.spark.{HBaseRepository, HbaseConnectionProperties}
-import com.hbaseservices.spark.streaming.DataPipelineTestBase
+import com.financialservices.spark.{HBaseRepository, HbaseConnectionProperties}
+import com.financialservices.spark.streaming.DataPipelineTestBase
 import org.apache.hadoop.conf.Configuration
 import org.apache.hadoop.hbase.{HBaseConfiguration, HBaseTestingUtility, HConstants}
 import org.apache.spark.SparkConf

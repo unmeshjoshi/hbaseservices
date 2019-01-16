@@ -1,7 +1,7 @@
-package com.hbaseservices.spark.streaming
+package com.financialservices.spark.streaming
 
-import com.hbaseservices.AccountPosition
-import com.hbaseservices.spark.{HBaseRepository, HbaseConnectionProperties}
+import com.financialservices.AccountPosition
+import com.financialservices.spark.{HBaseRepository, HbaseConnectionProperties}
 import org.apache.spark.sql.{ForeachWriter, SparkSession}
 
 

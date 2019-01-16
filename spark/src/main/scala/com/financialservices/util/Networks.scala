@@ -1,4 +1,4 @@
-package com.hbaseservices.util
+package com.financialservices.util
 
 import java.net.{Inet6Address, InetAddress, NetworkInterface}
 

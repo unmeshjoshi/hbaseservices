@@ -1,8 +1,8 @@
-package com.hbaseservices.spark.streaming
+package com.financialservices.spark.streaming
 
 import java.util.{Properties, UUID}
 
-import com.hbaseservices.util.Networks
+import com.financialservices.util.Networks
 import net.manub.embeddedkafka.{EmbeddedKafka, EmbeddedKafkaConfig}
 import org.apache.hadoop.conf.Configuration
 import org.apache.hadoop.hbase.{HBaseConfiguration, HBaseTestingUtility, HConstants}
@@ -14,11 +14,12 @@ import org.scalatest.{BeforeAndAfterAll, FunSuite, Matchers}
 import scala.concurrent.duration._
 
 abstract class DataPipelineTestBase extends FunSuite with BeforeAndAfterAll with Matchers with Eventually {
-  implicit val patience = PatienceConfig(10.seconds, 1.seconds)
+  implicit val patience = PatienceConfig(20.seconds, 1.seconds)
   implicit val embeddedKafkaConfig: EmbeddedKafkaConfig = createKafkaConfig
   val hbaseTestUtility = newHbaseTestUtility
 
   override def afterAll(): Unit = {
+    super.beforeAll()
     EmbeddedKafka.stop()
     hbaseTestUtility.shutdownMiniCluster()
   }
@@ -57,7 +58,7 @@ abstract class DataPipelineTestBase extends FunSuite with BeforeAndAfterAll with
 
   override protected def beforeAll(): Unit = {
     EmbeddedKafka.start()(embeddedKafkaConfig)
-    hbaseTestUtility.startMiniCluster();
+    val cluster = hbaseTestUtility.startMiniCluster()
   }
 
   private def newHbaseTestUtility = {
