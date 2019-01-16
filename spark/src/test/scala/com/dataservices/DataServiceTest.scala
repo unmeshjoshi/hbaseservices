@@ -27,7 +27,7 @@ class DataServiceTest extends FunSuite with BeforeAndAfterAll with Matchers with
 
     val c = hbaseTestUtility.getConnection
 
-    val positions = new AccountPositionRepository(c).getPositionsFor("10100002899999")
+    val positions = new AccountPositionRepository(c).getPositionsFor("10100002899999", "19-Aug-14")
 
     assert(positions.size == 1)
     assert(positions(0).acctKey == "10100002899999")
@@ -44,7 +44,7 @@ class DataServiceTest extends FunSuite with BeforeAndAfterAll with Matchers with
 
     val c = hbaseTestUtility.getConnection
 
-    val positions = new AccountPositionRepository(c).getPositionsFor("10100002899999")
+    val positions = new AccountPositionRepository(c).getPositionsFor("10100002899999", "19-Aug-14")
 
     assert(positions.size == 2)
     assert(positions(0).acctKey == "10100002899999")

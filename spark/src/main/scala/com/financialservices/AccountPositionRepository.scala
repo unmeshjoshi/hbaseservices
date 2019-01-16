@@ -2,6 +2,7 @@ package com.financialservices
 
 import org.apache.hadoop.hbase.TableName
 import org.apache.hadoop.hbase.client._
+import org.apache.hadoop.hbase.filter.PrefixFilter
 import org.apache.hadoop.hbase.util.Bytes
 
 import scala.collection.JavaConversions._
@@ -9,31 +10,25 @@ import scala.collection.JavaConversions._
 class AccountPositionRepository(val connection: Connection) {
   val columnFamily = "cf"
 
-  def getPositionsFor(acctKey: String, aggregateByField:String): List[AccountPosition] = {
-    List[AccountPosition]()
-  }
-
-  val date = "19-Aug-14"
-  def getPositionsFor(acctKey: String): List[AccountPosition] = {
-    val key = Bytes.toBytes(s"${acctKey}-$date")
-    val g = new Get(key)
-    g.setMaxVersions()
-    val table = connection.getTable(TableName.valueOf("Positions"))
-    val result = table.get(g)
-
-
+  def getAllPositionsFor(acctKey: String): List[AccountPosition] = {
     val scan: Scan = buildScanner(acctKey)
     val scanResult = executeScan(scan)
-    val positions = getPositions(acctKey, scanResult, date)
-
+    val positions = getPositions(acctKey, scanResult)
     positions.toList
   }
 
-  private def getPositions(acctKey: String, scanner: ResultScanner, date:String) = {
+  def getPositionsFor(acctKey: String, date:String): List[AccountPosition] = {
+    val scan: Scan = buildScanner(acctKey, date)
+    val scanResult = executeScan(scan)
+    val positions = getPositions(acctKey, scanResult)
+    positions
+  }
+
+  private def getPositions(acctKey: String, scanner: ResultScanner) = {
     scanner.toList.map(result ⇒ {
       val balance = getValue(result, "balance")
-      AccountPosition(acctKey, balance, date)
-
+      val rowKey = Bytes.toString(result.getRow)
+      AccountPosition(acctKey, balance, rowKey)
     })
   }
 
@@ -54,7 +49,16 @@ class AccountPositionRepository(val connection: Connection) {
 
   private def buildScanner(acctKey: String) = {
     val acctKeyBytes = Bytes.toBytes(acctKey)
-    val scan = new Scan(acctKeyBytes)
+    val scan = new Scan()
+    scan.setFilter(new PrefixFilter(acctKeyBytes))
+    scan.setMaxVersions(10)
+    scan
+  }
+  private def buildScanner(acctKey: String, date:String) = {
+    val rowKeyPrefix = s"${acctKey}_${date}"
+    println(s"Fetching records maching prefix ${rowKeyPrefix}")
+    val scan = new Scan()
+    scan.setFilter(new PrefixFilter(Bytes.toBytes(rowKeyPrefix)))
     scan.setMaxVersions(10)
     scan
   }

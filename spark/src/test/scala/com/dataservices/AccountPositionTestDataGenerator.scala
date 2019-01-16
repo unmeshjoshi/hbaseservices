@@ -4,7 +4,12 @@ import org.apache.hadoop.hbase.client._
 import org.apache.hadoop.hbase.util.Bytes
 import org.apache.hadoop.hbase.{HBaseTestingUtility, TableName}
 
+import scala.util.Random
+
 class AccountPositionTestDataGenerator(hbaseTestUtility: HBaseTestingUtility, val columnFamily: String = "cf", val tableName: String = "Positions") {
+  def deleteTable(): Unit = {
+    val table = hbaseTestUtility.deleteTable(TableName.valueOf(tableName))
+  }
 
   def seedData(acctKey: String, date: String, balance:String): AccountPositionTestDataGenerator = {
     val t1 = putRow(acctKey, date, balance)
@@ -13,21 +18,39 @@ class AccountPositionTestDataGenerator(hbaseTestUtility: HBaseTestingUtility, va
   }
 
   private def putRow(acctKey: String, date: String, balance:String) = {
-    val p = new Put(Bytes.toBytes(s"${acctKey}-${date}"))
-    addColumn(p, columnFamily, "balance", balance)
+    val rowKey: String = uniqueRowKey(acctKey, date)
+    put(rowKey, putRequest(rowKey, balance))
+  }
 
-    val c: Connection = hbaseTestUtility.getConnection
-    val hbaseTable = c.getTable(TableName.valueOf(tableName))
-
+  private def put(rowKey:String, p: Put) = {
+    val hbaseTable: Table = getHBaseTable(tableName)
     hbaseTable.put(p)
+    getLatestVersionTimestamp(rowKey, hbaseTable)
+  }
 
-    val g = new Get(Bytes.toBytes(s"${acctKey}-${date}"))
+  private def getHBaseTable(tableName: String) = {
+    val c = hbaseTestUtility.getConnection
+    val hbaseTable = c.getTable(TableName.valueOf(tableName))
+    hbaseTable
+  }
+
+  private def putRequest(hbaseKey: String, balance: String) = {
+    val p = new Put(Bytes.toBytes(hbaseKey))
+    addColumn(p, columnFamily, "balance", balance)
+    p
+  }
+
+  private def uniqueRowKey(acctKey: String, date: String) = {
+    s"${acctKey}_${date}_${new Random().nextInt()}"
+  }
+
+  private def getLatestVersionTimestamp(hbaseKey: String, hbaseTable: Table) = {
+    val g = new Get(Bytes.toBytes(hbaseKey))
     g.setMaxVersions(40)
     val result = hbaseTable.get(g)
 
     result.rawCells()(0).getTimestamp
   }
-
 
   private def addColumn(p: Put, columnFamily: String, columnName: String, columnValue: String) = {
     p.addColumn(Bytes.toBytes(columnFamily), Bytes.toBytes(columnName), Bytes.toBytes(columnValue))
