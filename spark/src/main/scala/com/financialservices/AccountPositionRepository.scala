@@ -38,7 +38,7 @@ class AccountPositionRepository(val connection: Connection) {
       val values = cell.getValue()
       println(new String(values))
     })
-    result.getValue(Bytes.toBytes(columnFamily), Bytes.toBytes(columnName)).toString
+    Bytes.toString(result.getValue(Bytes.toBytes(columnFamily), Bytes.toBytes(columnName)))
   }
 
   private def executeScan(scan: Scan) = {
