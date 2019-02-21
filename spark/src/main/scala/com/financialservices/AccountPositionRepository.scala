@@ -27,8 +27,9 @@ class AccountPositionRepository(val connection: Connection) {
   private def getPositions(acctKey: String, scanner: ResultScanner) = {
     scanner.toList.map(result ⇒ {
       val balance = getValue(result, "balance")
+      val units = getValue(result, "units")
       val rowKey = Bytes.toString(result.getRow)
-      AccountPosition(acctKey, balance, rowKey)
+      AccountPosition(1, acctKey, balance, rowKey, units)
     })
   }
 

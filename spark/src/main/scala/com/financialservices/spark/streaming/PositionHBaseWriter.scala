@@ -5,7 +5,8 @@ import com.financialservices.spark.{HBaseRepository, HbaseConnectionProperties}
 import org.apache.spark.sql.{ForeachWriter, SparkSession}
 
 
-class PositionHBaseWriter(sparkSession: SparkSession, zookeeperConnection: HbaseConnectionProperties) extends ForeachWriter[AccountPosition] with Serializable {
+class PositionHBaseWriter(sparkSession: SparkSession, zookeeperConnection: HbaseConnectionProperties, shouldFail:Boolean) extends ForeachWriter[AccountPosition] with Serializable {
+  var exception:Exception = _
   override def open(partitionId: Long, version: Long): Boolean = true
 
   override def process(value: AccountPosition): Unit = {

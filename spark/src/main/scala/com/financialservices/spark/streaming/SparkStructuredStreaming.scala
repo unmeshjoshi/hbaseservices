@@ -10,7 +10,7 @@ import org.apache.spark.sql.{DataFrame, Dataset, SparkSession}
 
 object SparkStructuredStreaming extends Serializable {
 
-  def processStream(gemfireCacheProvider:GemfireCacheProvider, sparkSession: SparkSession, kafkaBootstrapServers: String, zookeeperConnection: HbaseConnectionProperties, kafkaTopic: String) = {
+  def processStream(gemfireCacheProvider:GemfireCacheProvider, sparkSession: SparkSession, kafkaBootstrapServers: String, zookeeperConnection: HbaseConnectionProperties, kafkaTopic: String, shouldFail:Boolean) = {
 
     val frame: DataFrame = kafkaMessageStream(sparkSession, kafkaBootstrapServers, kafkaTopic)
 
@@ -18,7 +18,8 @@ object SparkStructuredStreaming extends Serializable {
     val date = "20-Aug-14"
 
     import sparkSession.implicits._
-    val dataSet: Dataset[AccountPosition] = frame
+    var num = 0
+    val dataSet = frame
       .map(row ⇒ {
         val xmlMessage = row.getAs[String](1)
         import com.thoughtworks.xstream.XStream
@@ -26,15 +27,15 @@ object SparkStructuredStreaming extends Serializable {
         val xstream = new XStream(new StaxDriver)
         xstream.alias("account", classOf[Account])
         val accountMessage = xstream.fromXML(xmlMessage).asInstanceOf[Account]
-        new AccountPosition(accountMessage.accountKey, accountMessage.amount, accountMessage.date)
+        AccountPosition(accountMessage.num, accountMessage.accountKey, accountMessage.amount, accountMessage.date, "")
       })
 
 
-    val hbaseWriter = new PositionHBaseWriter(sparkSession, zookeeperConnection)
-    val gemfireWriter = new GemfireWriter(sparkSession, gemfireCacheProvider)
+    val hbaseWriter = new PositionHBaseWriter(sparkSession, zookeeperConnection, shouldFail)
+    val gemfireWriter = new GemfireWriter(sparkSession, gemfireCacheProvider, zookeeperConnection)
 
-    val hbaseStream = dataSet.writeStream.foreach(hbaseWriter).start()
-    val gemfireStream = dataSet.writeStream.foreach(hbaseWriter).start()
+    dataSet.writeStream.foreach(hbaseWriter).start()
+    dataSet.writeStream.foreach(gemfireWriter).start()
   }
 
   private def kafkaMessageStream(sparkSession: SparkSession, kafkaBootstrapServers: String, kafkaTopic: String) = {
@@ -47,6 +48,7 @@ object SparkStructuredStreaming extends Serializable {
       .option("kafka.metadata.max.age.ms", "1")
       .option("kafka.default.api.timeout.ms", "3000")
       .option("startingOffsets", "earliest") //Must for tests.
+      .option("checkpointLocation", "/tmp/checkpoint_hbase") //Must for tests.
       .load()
 
 

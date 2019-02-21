@@ -11,15 +11,25 @@ class AccountPositionTestDataGenerator(hbaseTestUtility: HBaseTestingUtility, va
     val table = hbaseTestUtility.deleteTable(TableName.valueOf(tableName))
   }
 
-  def seedData(acctKey: String, date: String, balance:String): AccountPositionTestDataGenerator = {
-    val t1 = putRow(acctKey, date, balance)
+  def seedData(acctKey: String, date: String, balance:String, units:String = "0", versionNumber:Long = Long.MaxValue): AccountPositionTestDataGenerator = {
+    val t1 = putRow(acctKey, date, balance, units, versionNumber, uniqueRowKey(acctKey, date))
     println(t1)
     this
   }
 
-  private def putRow(acctKey: String, date: String, balance:String) = {
-    val rowKey: String = uniqueRowKey(acctKey, date)
-    put(rowKey, putRequest(rowKey, balance))
+  private def uniqueRowKey(acctKey: String, date: String) = {
+    s"${acctKey}_${date}_${new Random().nextInt()}"
+  }
+
+
+  def seedData(acctKey: String, date: String, balance:String, versionNumber:Long, rowKey:String): AccountPositionTestDataGenerator = {
+    val t1 = putRow(acctKey, date, balance, "0", versionNumber, rowKey)
+    println(t1)
+    this
+  }
+
+  private def putRow(acctKey: String, date: String, balance:String, units:String, version:Long, rowKey:String) = {
+     put(rowKey, putRequest(rowKey, balance, units, version))
   }
 
   private def put(rowKey:String, p: Put) = {
@@ -34,14 +44,11 @@ class AccountPositionTestDataGenerator(hbaseTestUtility: HBaseTestingUtility, va
     hbaseTable
   }
 
-  private def putRequest(hbaseKey: String, balance: String) = {
+  private def putRequest(hbaseKey: String, balance: String, units:String, version:Long) = {
     val p = new Put(Bytes.toBytes(hbaseKey))
-    addColumn(p, columnFamily, "balance", balance)
+    addColumn(p, columnFamily, "balance", balance, version)
+    addColumn(p, columnFamily, "units", balance, version)
     p
-  }
-
-  private def uniqueRowKey(acctKey: String, date: String) = {
-    s"${acctKey}_${date}_${new Random().nextInt()}"
   }
 
   private def getLatestVersionTimestamp(hbaseKey: String, hbaseTable: Table) = {
@@ -52,8 +59,8 @@ class AccountPositionTestDataGenerator(hbaseTestUtility: HBaseTestingUtility, va
     result.rawCells()(0).getTimestamp
   }
 
-  private def addColumn(p: Put, columnFamily: String, columnName: String, columnValue: String) = {
-    p.addColumn(Bytes.toBytes(columnFamily), Bytes.toBytes(columnName), Bytes.toBytes(columnValue))
+  private def addColumn(p: Put, columnFamily: String, columnName: String, columnValue: String, version:Long) = {
+    p.addColumn(Bytes.toBytes(columnFamily), Bytes.toBytes(columnName), version, Bytes.toBytes(columnValue))
   }
 
 

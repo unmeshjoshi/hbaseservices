@@ -82,6 +82,7 @@ class HBaseRepository(sparkSession: SparkSession, zookeeperQuorum: HbaseConnecti
     val values = schema.fields.map(field ⇒ {
       val dataType: DataType = field.dataType
       val value = result.getValue(columnFamily.getBytes, field.name.getBytes)
+      val cells = result.rawCells()
       dataType match {
         case DataTypes.LongType ⇒ Bytes.toLong(value)
         case DataTypes.StringType ⇒ Bytes.toString(value)

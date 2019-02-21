@@ -10,6 +10,7 @@ import org.apache.spark.sql.SparkSession
 
 class SparkStructuredStreamingTest extends DataPipelineTestBase {
   val positionsTestDataGenerator = new AccountPositionTestDataGenerator(hbaseTestUtility)
+
   override protected def beforeAll() = {
     super.beforeAll()
     positionsTestDataGenerator.createTable()
@@ -17,10 +18,10 @@ class SparkStructuredStreamingTest extends DataPipelineTestBase {
 
   test("should consume messages from spark") {
 
-    positionsTestDataGenerator.seedData("10100002899999", "19-Aug-14", "100")
 
+    positionsTestDataGenerator.seedData("10100002899999", "19-Aug-14", "100")
     val kafkaTopic = "financials"
-    produceTestMessagesSync(topic=kafkaTopic, accountNumber = "10100002899999", notOfMessages = 10)
+    produceTestMessagesSync(topic = kafkaTopic, accountNumber = "10100002899999", noOfMessages = 10)
 
     val conf: Configuration = hbaseTestUtility.getConfiguration
 
@@ -35,23 +36,23 @@ class SparkStructuredStreamingTest extends DataPipelineTestBase {
 
     val gemfireCache = new TestGemfireCache()
 
-    SparkStructuredStreaming.processStream(gemfireCache, sparkSession, bootstrapServers, HbaseConnectionProperties(conf), kafkaTopic)
-
+    SparkStructuredStreaming.processStream(gemfireCache, sparkSession, bootstrapServers, HbaseConnectionProperties(conf), kafkaTopic, shouldFail = true)
     val hbaseRepository = new HBaseRepository(sparkSession, HbaseConnectionProperties(conf))
 
     eventually {
       val dataFrame = hbaseRepository.readFromHBase("10100002899999")
-      assert(dataFrame.count() == 11)
+      assert(dataFrame.count() == 50)
     }
 
   }
 
-  private def produceTestMessagesSync(topic: String, accountNumber: String, notOfMessages:Int): Unit = {
+  private def produceTestMessagesSync(topic: String, accountNumber: String, noOfMessages: Int): Unit = {
 
     val producer = createProducer
 
-    for (i ← 1 to notOfMessages) {
+    for (i ← 1 to noOfMessages) {
       val position = s"<account>" +
+        s"<num>${i}</num>" +
         s"<accountKey>${accountNumber}</accountKey>" +
         s"<amount>${(i * 100) + 1000}</amount>" +
         "<accountType>SAVINGS</accountType>" +
