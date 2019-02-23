@@ -19,8 +19,8 @@ import scala.collection.JavaConverters._
 
 class TableInputFormatExecutor {
 
-  def queryOnSplits(conf: Configuration, columnFilter: Map[String, String]): (Seq[InputSplit], List[Result]) = {
-    setScan(columnFilter, conf)
+  def queryOnSplits(conf: Configuration, scan:Scan): (Seq[InputSplit], List[Result]) = {
+    serializeAndSetScan(conf, scan)
 
     val inputFormat = new TableInputFormat()
     inputFormat.setConf(conf)
@@ -55,22 +55,6 @@ class TableInputFormatExecutor {
     val jobNumber = 1
     val jobId = new JobID(jobTrackerId, jobNumber)
     jobId
-  }
-
-  private def setScan(filterColumnValues: Map[String, Any], conf: Configuration): Configuration = {
-    val scan = new Scan()
-    scan.setCaching(100)
-    val filterList = new FilterList(FilterList.Operator.MUST_PASS_ALL)
-    filterColumnValues.foreach(tuple ⇒ {
-      val valueBytes = tuple._2 match {
-        case str: String ⇒ Bytes.toBytes(str)
-        case number: Long ⇒ Bytes.toBytes(number)
-      }
-      filterList.addFilter(new SingleColumnValueFilter(Bytes.toBytes("cf"), Bytes.toBytes(tuple._1), CompareOp.EQUAL, valueBytes))
-    })
-    scan.setFilter(filterList)
-
-    serializeAndSetScan(conf, scan)
   }
 
   private def serializeAndSetScan(conf: Configuration, scan: Scan) = {

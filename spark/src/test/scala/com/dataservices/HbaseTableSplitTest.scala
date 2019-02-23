@@ -3,7 +3,11 @@ package com.dataservices
 import com.financialservices.spark.HbaseConnectionProperties
 import com.financialservices.spark.streaming.DataPipelineTestBase
 import org.apache.hadoop.conf.Configuration
+import org.apache.hadoop.hbase.client.Scan
+import org.apache.hadoop.hbase.filter.CompareFilter.CompareOp
+import org.apache.hadoop.hbase.filter.{FilterList, SingleColumnValueFilter}
 import org.apache.hadoop.hbase.mapreduce.{TableInputFormat, TableOutputFormat}
+import org.apache.hadoop.hbase.util.Bytes
 
 class HbaseTableSplitTest extends DataPipelineTestBase {
   test("should get partitions for HBase table and execute scan query against each to get results") {
@@ -15,10 +19,25 @@ class HbaseTableSplitTest extends DataPipelineTestBase {
 
     val conf = getHBaseConfiguration
 
-    val splitsAndValues = new TableInputFormatExecutor().queryOnSplits(conf, Map(("balance", "100")))
+    val splitsAndValues = new TableInputFormatExecutor().queryOnSplits(conf, buildScan(Map(("balance", "100")), conf))
 
     assert(1 == splitsAndValues._1.size)
     assert(2 == splitsAndValues._2.size)
+  }
+
+
+  private def buildScan(filterColumnValues: Map[String, Any], conf: Configuration) = {
+    val scan = new Scan()
+    scan.setCaching(100)
+    val filterList = new FilterList(FilterList.Operator.MUST_PASS_ALL)
+    filterColumnValues.foreach(tuple ⇒ {
+      val valueBytes = tuple._2 match {
+        case str: String ⇒ Bytes.toBytes(str)
+        case number: Long ⇒ Bytes.toBytes(number)
+      }
+      filterList.addFilter(new SingleColumnValueFilter(Bytes.toBytes("cf"), Bytes.toBytes(tuple._1), CompareOp.EQUAL, valueBytes))
+    })
+    scan.setFilter(filterList)
   }
 
   private def getHBaseConfiguration = {
