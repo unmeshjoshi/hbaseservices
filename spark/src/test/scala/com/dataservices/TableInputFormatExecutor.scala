@@ -5,12 +5,10 @@ import java.util.{Date, Locale}
 
 import org.apache.hadoop.conf.Configuration
 import org.apache.hadoop.hbase.client.{Result, Scan}
-import org.apache.hadoop.hbase.filter.CompareFilter.CompareOp
-import org.apache.hadoop.hbase.filter.{FilterList, SingleColumnValueFilter}
 import org.apache.hadoop.hbase.io.ImmutableBytesWritable
 import org.apache.hadoop.hbase.mapreduce.TableInputFormat
 import org.apache.hadoop.hbase.protobuf.ProtobufUtil
-import org.apache.hadoop.hbase.util.{Base64, Bytes}
+import org.apache.hadoop.hbase.util.Base64
 import org.apache.hadoop.mapreduce.task.{JobContextImpl, TaskAttemptContextImpl}
 import org.apache.hadoop.mapreduce.{InputSplit, JobID, RecordReader, TaskAttemptID}
 
