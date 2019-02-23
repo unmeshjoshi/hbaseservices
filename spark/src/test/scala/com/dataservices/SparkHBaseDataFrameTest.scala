@@ -1,11 +1,14 @@
 package com.dataservices
 
-import com.financialservices.spark.{HBaseRepository, HbaseConnectionProperties}
 import com.financialservices.spark.streaming.DataPipelineTestBase
+import com.financialservices.spark.{HBaseRepository, HbaseConnectionProperties}
 import org.apache.hadoop.conf.Configuration
 import org.apache.hadoop.hbase.{HBaseConfiguration, HBaseTestingUtility, HConstants}
 import org.apache.spark.SparkConf
 import org.apache.spark.sql.SparkSession
+
+
+
 
 class SparkHBaseDataFrameTest extends DataPipelineTestBase {
 
@@ -14,8 +17,8 @@ class SparkHBaseDataFrameTest extends DataPipelineTestBase {
     val sparkSession = SparkSession.builder().config(sparkConf).getOrCreate()
 
     val positionGenerator = new AccountPositionTestDataGenerator(hbaseTestUtility).createTable()
-          .seedData("10100002899999", "19-Aug-14", "100")
-          .seedData("10100002899999", "20-Aug-15", "110")
+      .seedData("10100002899999", "19-Aug-14", "100")
+      .seedData("10100002899999", "20-Aug-15", "110")
 
     val conf: Configuration = hbaseTestUtility.getConfiguration
     val hbaseRepository = new HBaseRepository(sparkSession, HbaseConnectionProperties(conf))

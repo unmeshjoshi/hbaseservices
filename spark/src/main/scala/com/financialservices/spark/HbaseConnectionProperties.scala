@@ -6,8 +6,6 @@ case class HbaseConnectionProperties(val zookeerQuorum:String, val zookeeperClie
 
 object HbaseConnectionProperties {
   def apply(conf:Configuration) = {
-    val HBASE_CONFIGURATION_ZOOKEEPER_QUORUM = "hbase.zookeeper.quorum"
-    val HBASE_CONFIGURATION_ZOOKEEPER_CLIENTPORT = "hbase.zookeeper.property.clientPort"
-    new HbaseConnectionProperties(conf.get(HBASE_CONFIGURATION_ZOOKEEPER_QUORUM), conf.getInt(HBASE_CONFIGURATION_ZOOKEEPER_CLIENTPORT, 0))
+    new HbaseConnectionProperties(conf.get("hbase.zookeeper.quorum"), conf.getInt("hbase.zookeeper.property.clientPort", 0))
   }
 }
