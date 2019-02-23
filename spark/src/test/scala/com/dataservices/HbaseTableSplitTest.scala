@@ -19,7 +19,7 @@ import org.apache.hadoop.mapreduce.{JobID, RecordReader, TaskAttemptID}
 import scala.collection.JavaConverters._
 
 class HbaseTableSplitTest extends DataPipelineTestBase {
-  test("should get partitions for HBase and execute each to get results") {
+  test("should get partitions for HBase table and execute scan query against each to get results") {
 
     val positionGenerator = new AccountPositionTestDataGenerator(hbaseTestUtility).createTable()
       .seedData("10100002899999", "19-Aug-14", "100")
