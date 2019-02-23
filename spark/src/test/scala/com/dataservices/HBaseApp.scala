@@ -1,7 +1,7 @@
-package com.financialservices
+package com.dataservices
 
 import org.apache.hadoop.conf.Configuration
-import org.apache.hadoop.hbase.{HBaseConfiguration, HColumnDescriptor, HTableDescriptor, TableName}
+import org.apache.hadoop.hbase.HBaseConfiguration
 import org.apache.hadoop.hbase.mapreduce.{TableInputFormat, TableOutputFormat}
 
 object HBaseApp extends App {
@@ -15,7 +15,12 @@ object HBaseApp extends App {
   import org.apache.hadoop.hbase.client.ConnectionFactory
 
   val connection = ConnectionFactory.createConnection(config)
-
+  private val generator: AccountPositionTestDataGenerator = new AccountPositionTestDataGenerator(connection).createTable()
+  
+  (1 to 1000).foreach(i ⇒ {
+    generator
+      .seedData("10100002899999", "19-Aug-14", "100")
+  })
 
 
 
