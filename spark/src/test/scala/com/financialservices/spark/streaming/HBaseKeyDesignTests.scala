@@ -10,18 +10,19 @@ import org.scalatest.concurrent.Eventually
 
 class HBaseKeyDesignTests  extends FunSuite with BeforeAndAfterAll with BeforeAndAfter with Matchers with Eventually {
   private val hbaseTestUtility = newHbaseTestUtility
-  private val accountPositionDataGenerator = new AccountPositionTestDataGenerator(hbaseTestUtility)
+
 
   override protected def beforeAll(): Unit = {
     hbaseTestUtility.startMiniCluster();
+
   }
 
   before {
-    accountPositionDataGenerator.createTable()
+    new AccountPositionTestDataGenerator(hbaseTestUtility.getConnection).createTable()
   }
 
   after {
-    accountPositionDataGenerator.deleteTable()
+    new AccountPositionTestDataGenerator(hbaseTestUtility.getConnection).deleteTable()
   }
 
   override def afterAll(): Unit = {
@@ -32,7 +33,7 @@ class HBaseKeyDesignTests  extends FunSuite with BeforeAndAfterAll with BeforeAn
     val accountNumber = "1001"
     val instrument = "inst1"
     val accountKey = s"${accountNumber}_${instrument}"
-    accountPositionDataGenerator
+    new AccountPositionTestDataGenerator(hbaseTestUtility.getConnection)
       .seedData(accountKey, "1/1/2018", "100")
       .seedData(accountKey, "2/1/2018", "100")
 
@@ -45,7 +46,7 @@ class HBaseKeyDesignTests  extends FunSuite with BeforeAndAfterAll with BeforeAn
     val instrument = "inst1"
     val accountKey = s"${accountNumber}_${instrument}"
 
-    accountPositionDataGenerator
+    new AccountPositionTestDataGenerator(hbaseTestUtility.getConnection)
       .seedData(accountKey, "1/1/2018", "100")
       .seedData(accountKey, "2/1/2018", "102")
 

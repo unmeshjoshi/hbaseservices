@@ -16,7 +16,7 @@ class SparkHBaseDataFrameTest extends DataPipelineTestBase {
     val sparkConf = new SparkConf().setAppName("HBaseDataframe").setMaster("local[*]")
     val sparkSession = SparkSession.builder().config(sparkConf).getOrCreate()
 
-    val positionGenerator = new AccountPositionTestDataGenerator(hbaseTestUtility).createTable()
+    val positionGenerator = new AccountPositionTestDataGenerator(hbaseTestUtility.getConnection).createTable()
       .seedData("10100002899999", "19-Aug-14", "100")
       .seedData("10100002899999", "20-Aug-15", "110")
 

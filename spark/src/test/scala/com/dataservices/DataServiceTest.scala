@@ -20,7 +20,7 @@ class DataServiceTest extends FunSuite with BeforeAndAfterAll with Matchers with
 
   //
   test("should get list of positions for account key") {
-    new AccountPositionTestDataGenerator(hbaseTestUtility, "cf", "Positions")
+    new AccountPositionTestDataGenerator(hbaseTestUtility.getConnection, "cf", "Positions")
       .createTable()
       .seedData("10100002899999", "19-Aug-14", "100")
 
@@ -34,7 +34,7 @@ class DataServiceTest extends FunSuite with BeforeAndAfterAll with Matchers with
 
 
   test("should get specific version of position") {
-    val generator = new AccountPositionTestDataGenerator(hbaseTestUtility, "cf", "Positions")
+    val generator = new AccountPositionTestDataGenerator(hbaseTestUtility.getConnection, "cf", "Positions")
       .createTable()
     val t1 = generator
       .seedData("10100002899999", "19-Aug-14", "100")

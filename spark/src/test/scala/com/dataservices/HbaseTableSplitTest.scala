@@ -21,7 +21,7 @@ import scala.collection.JavaConverters._
 class HbaseTableSplitTest extends DataPipelineTestBase {
   test("should get partitions for HBase table and execute scan query against each to get results") {
 
-    val positionGenerator = new AccountPositionTestDataGenerator(hbaseTestUtility).createTable()
+    val positionGenerator = new AccountPositionTestDataGenerator(hbaseTestUtility.getConnection).createTable()
       .seedData("10100002899999", "19-Aug-14", "100")
       .seedData("10100002899999", "20-Aug-15", "110")
       .seedData("10100002899999", "21-Aug-15", "100")

@@ -2,13 +2,14 @@ package com.dataservices
 
 import org.apache.hadoop.hbase.client._
 import org.apache.hadoop.hbase.util.Bytes
-import org.apache.hadoop.hbase.{HBaseTestingUtility, TableName}
+import org.apache.hadoop.hbase.{HColumnDescriptor, HTableDescriptor, TableName}
 
 import scala.util.Random
 
-class AccountPositionTestDataGenerator(hbaseTestUtility: HBaseTestingUtility, val columnFamily: String = "cf", val tableName: String = "Positions") {
+class AccountPositionTestDataGenerator(connection:Connection, val columnFamily: String = "cf", val tableName: String = "Positions") {
   def deleteTable(): Unit = {
-    val table = hbaseTestUtility.deleteTable(TableName.valueOf(tableName))
+    val admin = connection.getAdmin
+    admin.deleteTable(TableName.valueOf(tableName))
   }
 
   def seedData(acctKey: String, date: String, balance:String, units:String = "0", versionNumber:Long = Long.MaxValue): AccountPositionTestDataGenerator = {
@@ -39,8 +40,7 @@ class AccountPositionTestDataGenerator(hbaseTestUtility: HBaseTestingUtility, va
   }
 
   private def getHBaseTable(tableName: String) = {
-    val c = hbaseTestUtility.getConnection
-    val hbaseTable = c.getTable(TableName.valueOf(tableName))
+    val hbaseTable = connection.getTable(TableName.valueOf(tableName))
     hbaseTable
   }
 
@@ -66,7 +66,14 @@ class AccountPositionTestDataGenerator(hbaseTestUtility: HBaseTestingUtility, va
 
   def createTable() = {
     val noOfVersions: Int = 40
-    val table = hbaseTestUtility.createTable(TableName.valueOf(tableName), Bytes.toBytes(columnFamily), noOfVersions)
+    val admin = connection.getAdmin
+    if (!admin.tableExists(TableName.valueOf(tableName))) {
+      println(s"Creating table ${tableName}")
+      val desc = new HTableDescriptor(tableName)
+      desc.addFamily(new HColumnDescriptor("cf"))
+      admin.createTable(desc)
+    }
+
     this
   }
 

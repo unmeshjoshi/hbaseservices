@@ -172,9 +172,10 @@ object Spark {
 
 object HBase {
 
-  val `hbase-client` = "org.apache.hbase" % "hbase-client" % CDHVersions.Hbase % "provided" excludeAll(
+  val `hbase-client` = "org.apache.hbase" % "hbase-client" % CDHVersions.Hbase  excludeAll(
     ExclusionRule(organization = "com.google.guava", "guava"),
     ExclusionRule(organization = "tomcat", "jasper-runtime"),
+    ExclusionRule(organization = "org.mortbay.jetty", name="jetty"),
     ExclusionRule(organization = "org.apache.hadoop", "hadoop-core"))
 
   val `hbase-server` = "org.apache.hbase" % "hbase-server" % CDHVersions.Hbase % "provided" excludeAll(
