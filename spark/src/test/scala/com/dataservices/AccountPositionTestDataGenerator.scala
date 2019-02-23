@@ -7,10 +7,6 @@ import org.apache.hadoop.hbase.{HColumnDescriptor, HTableDescriptor, TableName}
 import scala.util.Random
 
 class AccountPositionTestDataGenerator(connection:Connection, val columnFamily: String = "cf", val tableName: String = "Positions") {
-  def deleteTable(): Unit = {
-    val admin = connection.getAdmin
-    admin.deleteTable(TableName.valueOf(tableName))
-  }
 
   def seedData(acctKey: String, date: String, balance:String, units:String = "0", versionNumber:Long = Long.MaxValue): AccountPositionTestDataGenerator = {
     val t1 = putRow(acctKey, date, balance, units, versionNumber, uniqueRowKey(acctKey, date))
@@ -63,7 +59,6 @@ class AccountPositionTestDataGenerator(connection:Connection, val columnFamily: 
     p.addColumn(Bytes.toBytes(columnFamily), Bytes.toBytes(columnName), version, Bytes.toBytes(columnValue))
   }
 
-
   def createTable() = {
     val noOfVersions: Int = 40
     val admin = connection.getAdmin
@@ -73,9 +68,15 @@ class AccountPositionTestDataGenerator(connection:Connection, val columnFamily: 
       desc.addFamily(new HColumnDescriptor("cf"))
       admin.createTable(desc)
     }
-
     this
   }
+
+  def deleteTable() = {
+    val admin = connection.getAdmin
+    admin.deleteTable(TableName.valueOf(tableName))
+    this
+  }
+
 
 }
 

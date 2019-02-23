@@ -16,12 +16,16 @@ object HBaseApp extends App {
 
   val connection = ConnectionFactory.createConnection(config)
   private val generator: AccountPositionTestDataGenerator = new AccountPositionTestDataGenerator(connection).createTable()
-  
   (1 to 1000).foreach(i ⇒ {
+    val accountNumberBase = "101000028999"
+    val accountKey = s"${accountNumberBase}${i}"
     generator
-      .seedData("10100002899999", "19-Aug-14", "100")
+      .seedData(accountKey, "19-Aug-14", "100")
   })
 
+  val splitsAndValues = new TableInputFormatExecutor().queryOnSplits(config, Map(("balance", "100")))
 
+  assert(1 == splitsAndValues._1.size)
+  assert(2 == splitsAndValues._2.size)
 
 }
