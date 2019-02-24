@@ -7,6 +7,7 @@ import org.apache.hadoop.hbase.filter.CompareFilter.CompareOp
 import org.apache.hadoop.hbase.filter.{FilterList, SingleColumnValueFilter}
 import org.apache.hadoop.hbase.mapreduce.{TableInputFormat, TableOutputFormat}
 import org.apache.hadoop.hbase.util.Bytes
+import org.apache.hadoop.mapreduce.InputSplit
 
 object HBaseApp extends App {
   val config: Configuration = HBaseConfiguration.create()
@@ -19,7 +20,9 @@ object HBaseApp extends App {
   import org.apache.hadoop.hbase.client.ConnectionFactory
 
   val connection = ConnectionFactory.createConnection(config)
-  private val generator: AccountPositionTestDataGenerator = new AccountPositionTestDataGenerator(connection).createTable()
+  private val generator: AccountPositionTestDataGenerator = new AccountPositionTestDataGenerator(connection)
+      .createTable()
+
   (1 to 1000).foreach(i ⇒ {
     val accountNumberBase = "101000028999"
     val accountKey = s"${accountNumberBase}${i}"
@@ -29,8 +32,17 @@ object HBaseApp extends App {
 
   val splitsAndValues = new TableInputFormatExecutor().queryOnSplits(config, buildScan(Map(("balance", "100")), config))
 
-  assert(1 == splitsAndValues._1.size)
-  assert(2 == splitsAndValues._2.size)
+  println("Number of splits = " + splitsAndValues._1.size)
+  private val splits: Seq[InputSplit] = splitsAndValues._1
+  splits.foreach(split ⇒ {
+    print(split.getLength)
+    print(split.getLocationInfo)
+    val locations = split.getLocations
+    locations.foreach(l ⇒ {
+      println(l)
+    })
+  })
+  println("Values " + splitsAndValues._2)
 
 
   private def buildScan(filterColumnValues: Map[String, Any], conf: Configuration) = {

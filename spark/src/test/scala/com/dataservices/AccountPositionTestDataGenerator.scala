@@ -1,7 +1,7 @@
 package com.dataservices
 
 import org.apache.hadoop.hbase.client._
-import org.apache.hadoop.hbase.util.Bytes
+import org.apache.hadoop.hbase.util.{Bytes, RegionSplitter}
 import org.apache.hadoop.hbase.{HColumnDescriptor, HTableDescriptor, TableName}
 
 import scala.util.Random
@@ -66,7 +66,8 @@ class AccountPositionTestDataGenerator(connection:Connection, val columnFamily: 
       println(s"Creating table ${tableName}")
       val desc = new HTableDescriptor(tableName)
       desc.addFamily(new HColumnDescriptor("cf"))
-      admin.createTable(desc)
+      val splitter = new RegionSplitter.HexStringSplit()
+      admin.createTable(desc, splitter.split(20))
     }
     this
   }
