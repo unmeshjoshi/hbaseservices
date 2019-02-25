@@ -43,7 +43,7 @@ class HBaseRepository(sparkSession: SparkSession, zookeeperQuorum: HbaseConnecti
 
   val hbaseSchema: StructType = StructType(List(StructField("balance", DataTypes.StringType, true, Metadata.empty)))
 
-  def readFromHBase(df: DataFrame) = {
+  def readFromHBaseFor(df: DataFrame) = {
       import sparkSession.implicits._
      df.mapPartitions(rows ⇒ {
        val hbaseConnection = ConnectionFactory.createConnection(getHbaseConfiguration())
