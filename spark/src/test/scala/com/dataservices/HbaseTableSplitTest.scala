@@ -8,8 +8,12 @@ import org.apache.hadoop.hbase.filter.CompareFilter.CompareOp
 import org.apache.hadoop.hbase.filter.{FilterList, SingleColumnValueFilter}
 import org.apache.hadoop.hbase.mapreduce.{TableInputFormat, TableOutputFormat}
 import org.apache.hadoop.hbase.util.Bytes
+import org.apache.spark.SparkConf
+import org.apache.spark.sql.SparkSession
+import org.apache.spark.sql.types.{IntegerType, StringType, StructField}
 
 class HbaseTableSplitTest extends DataPipelineTestBase {
+
   test("should get partitions for HBase table and execute scan query against each to get results") {
 
     val positionGenerator = new AccountPositionTestDataGenerator(hbaseTestUtility.getConnection).createTable()

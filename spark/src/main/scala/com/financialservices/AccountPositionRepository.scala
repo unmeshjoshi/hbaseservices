@@ -13,19 +13,20 @@ class AccountPositionRepository(val connection: Connection) {
   def getAllPositionsFor(acctKey: String): List[AccountPosition] = {
     val scan: Scan = buildScanner(acctKey)
     val scanResult = executeScan(scan)
-    val positions = getPositions(acctKey, scanResult)
+    val positions = getPositions(scanResult)
     positions.toList
   }
 
   def getPositionsFor(acctKey: String, date:String): List[AccountPosition] = {
     val scan: Scan = buildScanner(acctKey, date)
     val scanResult = executeScan(scan)
-    val positions = getPositions(acctKey, scanResult)
+    val positions = getPositions(scanResult)
     positions
   }
 
-  private def getPositions(acctKey: String, scanner: ResultScanner) = {
+  def getPositions(scanner: ResultScanner) = {
     scanner.toList.map(result ⇒ {
+      val acctKey = getValue(result, "accountKey")
       val balance = getValue(result, "balance")
       val units = getValue(result, "units")
       val rowKey = Bytes.toString(result.getRow)

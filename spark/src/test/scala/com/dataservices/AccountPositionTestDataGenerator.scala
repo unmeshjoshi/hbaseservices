@@ -10,12 +10,11 @@ class AccountPositionTestDataGenerator(connection:Connection, val columnFamily: 
 
   def seedData(acctKey: String, date: String, balance:String, units:String = "0", versionNumber:Long = Long.MaxValue): AccountPositionTestDataGenerator = {
     val t1 = putRow(acctKey, date, balance, units, versionNumber, uniqueRowKey(acctKey, date))
-    println(t1)
     this
   }
 
   private def uniqueRowKey(acctKey: String, date: String) = {
-    s"${acctKey}_${date}_${new Random().nextInt()}"
+    s"${new Random().nextInt()}_${acctKey}_${date}"
   }
 
 
@@ -25,8 +24,9 @@ class AccountPositionTestDataGenerator(connection:Connection, val columnFamily: 
     this
   }
 
-  private def putRow(acctKey: String, date: String, balance:String, units:String, version:Long, rowKey:String) = {
-     put(rowKey, putRequest(rowKey, balance, units, version))
+
+  def putRow(acctKey: String, date: String, balance:String, units:String, version:Long, rowKey:String) = {
+     put(rowKey, putRequest(rowKey, acctKey, balance, units, version))
   }
 
   private def put(rowKey:String, p: Put) = {
@@ -40,10 +40,11 @@ class AccountPositionTestDataGenerator(connection:Connection, val columnFamily: 
     hbaseTable
   }
 
-  private def putRequest(hbaseKey: String, balance: String, units:String, version:Long) = {
+  private def putRequest(hbaseKey: String, acctKey:String, balance: String, units:String, version:Long) = {
     val p = new Put(Bytes.toBytes(hbaseKey))
+    addColumn(p, columnFamily, "accountKey", acctKey, version)
     addColumn(p, columnFamily, "balance", balance, version)
-    addColumn(p, columnFamily, "units", balance, version)
+    addColumn(p, columnFamily, "units", units, version)
     p
   }
 
