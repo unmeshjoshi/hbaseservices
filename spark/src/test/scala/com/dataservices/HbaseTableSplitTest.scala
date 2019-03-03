@@ -25,7 +25,7 @@ class HbaseTableSplitTest extends DataPipelineTestBase {
 
     val splitsAndValues = new TableInputFormatExecutor().queryOnSplits(conf, buildScan(Map(("balance", "100")), conf))
 
-    assert(1 == splitsAndValues._1.size)
+    assert(20 == splitsAndValues._1.size)
     assert(2 == splitsAndValues._2.size)
   }
 
@@ -57,5 +57,4 @@ class HbaseTableSplitTest extends DataPipelineTestBase {
     conf.set("mapreduce.outputformat.class", "org.apache.hadoop.hbase.mapreduce.TableOutputFormat")
     conf
   }
-
 }

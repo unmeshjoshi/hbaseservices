@@ -17,7 +17,7 @@ class DataFrameBuilder(schema:List[StructField]) {
 
 class DataFrameBuilderS(schema:List[StructField]) {
   def createDataFrame(session: SparkSession, rowValues: Seq[String]): DataFrame = {
-    val rowRDD = session.sparkContext.parallelize(rows(rowValues))
+    val rowRDD = session.sparkContext.parallelize(rows(rowValues), 5)
     session.createDataFrame(rowRDD, StructType(schema))
   }
 

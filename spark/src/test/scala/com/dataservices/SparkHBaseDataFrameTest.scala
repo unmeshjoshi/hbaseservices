@@ -15,6 +15,7 @@ import scala.collection.mutable.ListBuffer
 
 
 class SparkHBaseDataFrameTest extends DataPipelineTestBase {
+  val noOfRecords = 1000
 
   test("should be able to read from hbase based on dataframe created from row keys") {
     val sparkConf = new SparkConf().setAppName("spark-dataframe-tests").setMaster("local[*]")
@@ -40,7 +41,7 @@ class SparkHBaseDataFrameTest extends DataPipelineTestBase {
 
     val positions = dataSet.collectAsList().asScala
 
-    assert(100 == positions.size)
+    assert(noOfRecords == positions.size)
 
     val expectedAccountKeys = accountKeysAndRowKeys._1
     expectedAccountKeys.foreach(expectedAccountKey ⇒ {
@@ -91,7 +92,7 @@ class SparkHBaseDataFrameTest extends DataPipelineTestBase {
     val schema = List(StructField("rowKey", StringType, true))
     val dataframeBuilder = new DataFrameBuilderS(schema)
     //Need TO order by to make sure its lexicographically ordered so that we can use startRow and endRow filter in hbase.
-    val criteriaDf = dataframeBuilder.createDataFrame(session, rowKeys.toSeq).orderBy("rowKey")
+    val criteriaDf = dataframeBuilder.createDataFrame(session, rowKeys.toSeq) //.orderBy("rowKey") Now that we are doing GET calls, there is no need for oerdering
     criteriaDf
   }
 
@@ -101,7 +102,7 @@ class SparkHBaseDataFrameTest extends DataPipelineTestBase {
     val rowKeys = new ListBuffer[String]()
 
     val positionGenerator = new AccountPositionTestDataGenerator(hbaseTestUtility.getConnection).createTable()
-    (1 to 100).foreach(i ⇒ {
+    (1 to noOfRecords).foreach(i ⇒ {
       val accountNumberBase = "101000028999"
       val accountKey = s"${accountNumberBase}${i}"
       val date = "19-Aug-14"

@@ -35,8 +35,6 @@ object HBaseApp extends App {
   println("Number of splits = " + splitsAndValues._1.size)
   private val splits: Seq[InputSplit] = splitsAndValues._1
   splits.foreach(split ⇒ {
-    print(split.getLength)
-    print(split.getLocationInfo)
     val locations = split.getLocations
     locations.foreach(l ⇒ {
       println(l)

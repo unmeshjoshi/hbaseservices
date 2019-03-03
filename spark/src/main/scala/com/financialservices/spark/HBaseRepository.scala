@@ -7,7 +7,7 @@ import org.apache.hadoop.conf.Configuration
 import org.apache.hadoop.hbase.TableName
 import org.apache.hadoop.hbase.client.{Get, Put, Result, Scan}
 import org.apache.hadoop.hbase.filter.CompareFilter.CompareOp
-import org.apache.hadoop.hbase.filter.{FilterList, PrefixFilter, RowFilter, SingleColumnValueFilter}
+import org.apache.hadoop.hbase.filter.{FilterList, PrefixFilter, SingleColumnValueFilter}
 import org.apache.hadoop.hbase.io.ImmutableBytesWritable
 import org.apache.hadoop.hbase.mapreduce.{TableInputFormat, TableOutputFormat}
 import org.apache.hadoop.hbase.protobuf.ProtobufUtil
@@ -17,7 +17,6 @@ import org.apache.spark.sql.types._
 import org.apache.spark.sql.{DataFrame, Row, SparkSession}
 
 import scala.collection.immutable
-import scala.collection.mutable.ListBuffer
 
 
 class HBaseRepository(sparkSession: SparkSession, zookeeperQuorum: HbaseConnectionProperties) extends Serializable {
@@ -45,16 +44,22 @@ class HBaseRepository(sparkSession: SparkSession, zookeeperQuorum: HbaseConnecti
 
   def readFromHBaseFor(df: DataFrame) = {
       import sparkSession.implicits._
-     df.mapPartitions(rows ⇒ {
+     df.mapPartitions((rows: Iterator[Row]) ⇒ {
        val hbaseConnection = ConnectionFactory.createConnection(getHbaseConfiguration())
-       val repo = new AccountPositionRepository(hbaseConnection)
+       val repository = new AccountPositionRepository(hbaseConnection)
+       val repo = repository
        val list = rows.toList
        val table = hbaseConnection.getTable(TableName.valueOf("Positions"))
-       val scan = new Scan()
-       scan.setStartRow(Bytes.toBytes(list(0).get(0).asInstanceOf[String]))
-       scan.setStopRow(Bytes.toBytes(list(list.length - 1).get(0).asInstanceOf[String]))
-       val scanner = table.getScanner(scan)
-       val positions = new AccountPositionRepository(hbaseConnection).getPositions(scanner)
+
+       val gets: List[Get] = list.map(row ⇒ {
+         new Get(Bytes.toBytes(row.get(0).asInstanceOf[String]))
+       })
+
+       import scala.collection.JavaConverters._
+
+       val results = table.get(gets.toList.asJava)
+
+       val positions = results.map(r ⇒ repository.getAccountPositionFor(r))
        positions.toIterator
      })
   }

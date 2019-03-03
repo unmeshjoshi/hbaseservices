@@ -26,12 +26,16 @@ class AccountPositionRepository(val connection: Connection) {
 
   def getPositions(scanner: ResultScanner) = {
     scanner.toList.map(result ⇒ {
-      val acctKey = getValue(result, "accountKey")
-      val balance = getValue(result, "balance")
-      val units = getValue(result, "units")
-      val rowKey = Bytes.toString(result.getRow)
-      AccountPosition(1, acctKey, balance, rowKey, units)
+      getAccountPositionFor(result)
     })
+  }
+
+  def getAccountPositionFor(result: Result) = {
+    val acctKey = getValue(result, "accountKey")
+    val balance = getValue(result, "balance")
+    val units = getValue(result, "units")
+    val rowKey = Bytes.toString(result.getRow)
+    AccountPosition(1, acctKey, balance, rowKey, units)
   }
 
   private def getValue(result: Result, columnName: String) = {
