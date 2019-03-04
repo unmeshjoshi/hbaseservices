@@ -14,8 +14,6 @@ class DateRangeSplit extends FunSuite {
 
     val ranges = splitRange(DateRange(startDate, endDate), 3)
 
-    println(ranges)
-
     assert(startDate == ranges(0).startDate)
     assert(endDate == ranges(ranges.length - 1).endDate)
   }
@@ -26,7 +24,6 @@ class DateRangeSplit extends FunSuite {
 
     val ranges = splitRange(DateRange(startDate, endDate), 3)
 
-    println(ranges)
     assert(ranges.size == 1)
     assert(startDate == ranges(0).startDate)
     assert(endDate == ranges(ranges.length - 1).endDate)
@@ -36,36 +33,53 @@ class DateRangeSplit extends FunSuite {
     val startDate = LocalDate.parse("2017-08-01")
     val endDate = LocalDate.parse("2017-12-01")
 
-
-
     val ranges = splitRange(DateRange(startDate, endDate), 3)
 
-    println(ranges)
     assert(ranges.size == 2)
     assert(startDate == ranges(0).startDate)
     assert(endDate == ranges(1).endDate)
   }
 
 
-  case class DateRange(startDate:LocalDate, endDate:LocalDate)
+  case class DateRange(startDate:LocalDate, endDate:LocalDate) {
+    def monthsAfterStartDate(months:Int): DateRange = {
+      DateRange(startDate, startDate.plusMonths(months))
+    }
+
+    def nextSplit(months:Int): DateRange = {
+      DateRange(dayAfterEndDay(), endDate.plusMonths(months))
+    }
+
+    def endsBefore(other:DateRange) = {
+      endDate.isBefore(other.endDate)
+    }
+
+    def endsOnOrAfter(other:DateRange) = {
+      endDate.isAfter(other.endDate) || endDate.isEqual(other.endDate)
+    }
+
+    def endOn(endDate:LocalDate):DateRange = {
+      DateRange(startDate, endDate)
+    }
+
+    private def dayAfterEndDay() = {
+      endDate.plusDays(1)
+    }
+  }
+
+
   def splitRange(dateRange:DateRange, splitMonths:Int) = {
     val ranges = new ListBuffer[DateRange]()
 
-    var newStartDate: LocalDate = dateRange.startDate
-    var newEndDate: LocalDate = dateRange.startDate.plusMonths(3)
-    while (newEndDate.isBefore(dateRange.endDate) ) {
-      ranges += DateRange(newStartDate, newEndDate)
-      newStartDate = nextDay(newEndDate)
-      newEndDate = newEndDate.plusMonths(3)
+    var rangeSplit = dateRange.monthsAfterStartDate(splitMonths)
+    while (rangeSplit.endsBefore(dateRange)) {
+      ranges += rangeSplit
+      rangeSplit = rangeSplit.nextSplit(splitMonths)
     }
 
-    if (newEndDate.isAfter(dateRange.endDate) || newEndDate.isEqual(dateRange.endDate)) {
-      ranges += DateRange(newStartDate, dateRange.endDate)
+    if (rangeSplit.endsOnOrAfter(dateRange)) {
+      ranges += rangeSplit.endOn(dateRange.endDate)
     }
     ranges
-  }
-
-  private def nextDay(newEndDate: LocalDate) = {
-    newEndDate.plusDays(1)
   }
 }
