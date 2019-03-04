@@ -12,7 +12,7 @@ class DateRangeSplit extends FunSuite {
     val startDate = LocalDate.parse("2017-08-01")
     val endDate = LocalDate.parse("2018-08-01")
 
-    val ranges = splitRange(DateRange(startDate, endDate), 3)
+    val ranges = DateRange(startDate, endDate).splitInMonths(3)
 
     assert(startDate == ranges(0).startDate)
     assert(endDate == ranges(ranges.length - 1).endDate)
@@ -22,7 +22,7 @@ class DateRangeSplit extends FunSuite {
     val startDate = LocalDate.parse("2017-08-01")
     val endDate = LocalDate.parse("2017-09-01")
 
-    val ranges = splitRange(DateRange(startDate, endDate), 3)
+    val ranges = DateRange(startDate, endDate).splitInMonths(3)
 
     assert(ranges.size == 1)
     assert(startDate == ranges(0).startDate)
@@ -33,7 +33,7 @@ class DateRangeSplit extends FunSuite {
     val startDate = LocalDate.parse("2017-08-01")
     val endDate = LocalDate.parse("2017-12-01")
 
-    val ranges = splitRange(DateRange(startDate, endDate), 3)
+    val ranges = DateRange(startDate, endDate).splitInMonths(3)
 
     assert(ranges.size == 2)
     assert(startDate == ranges(0).startDate)
@@ -42,44 +42,42 @@ class DateRangeSplit extends FunSuite {
 
 
   case class DateRange(startDate:LocalDate, endDate:LocalDate) {
-    def monthsAfterStartDate(months:Int): DateRange = {
+
+    def splitInMonths(noOfMonths:Int) = {
+      val ranges = new ListBuffer[DateRange]()
+      var rangeSplit = monthsAfterStartDate(noOfMonths)
+      while (rangeSplit.endsBefore(endDate)) {
+        ranges += rangeSplit
+        rangeSplit = rangeSplit.monthsAfterEndDate(noOfMonths)
+      }
+      if (rangeSplit.endsOnOrAfter(endDate)) {
+        ranges += rangeSplit.endOn(endDate)
+      }
+      ranges.toList
+    }
+
+    private def monthsAfterStartDate(months:Int): DateRange = {
       DateRange(startDate, startDate.plusMonths(months))
     }
 
-    def nextSplit(months:Int): DateRange = {
+    private def monthsAfterEndDate(months:Int): DateRange = {
       DateRange(dayAfterEndDay(), endDate.plusMonths(months))
     }
 
-    def endsBefore(other:DateRange) = {
-      endDate.isBefore(other.endDate)
+    private def endsBefore(endDate:LocalDate) = {
+      endDate.isBefore(endDate)
     }
 
-    def endsOnOrAfter(other:DateRange) = {
-      endDate.isAfter(other.endDate) || endDate.isEqual(other.endDate)
+    private def endsOnOrAfter(endDate:LocalDate) = {
+      endDate.isAfter(endDate) || endDate.isEqual(endDate)
     }
 
-    def endOn(endDate:LocalDate):DateRange = {
+    private def endOn(endDate:LocalDate):DateRange = {
       DateRange(startDate, endDate)
     }
 
     private def dayAfterEndDay() = {
       endDate.plusDays(1)
     }
-  }
-
-
-  def splitRange(dateRange:DateRange, splitMonths:Int) = {
-    val ranges = new ListBuffer[DateRange]()
-
-    var rangeSplit = dateRange.monthsAfterStartDate(splitMonths)
-    while (rangeSplit.endsBefore(dateRange)) {
-      ranges += rangeSplit
-      rangeSplit = rangeSplit.nextSplit(splitMonths)
-    }
-
-    if (rangeSplit.endsOnOrAfter(dateRange)) {
-      ranges += rangeSplit.endOn(dateRange.endDate)
-    }
-    ranges
   }
 }
