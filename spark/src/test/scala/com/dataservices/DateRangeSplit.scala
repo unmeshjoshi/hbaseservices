@@ -1,7 +1,9 @@
 package com.dataservices
 
 import java.time.LocalDate
+import java.time.temporal.ChronoUnit
 
+import com.sun.javaws.exceptions.InvalidArgumentException
 import org.scalatest.FunSuite
 
 import scala.collection.mutable.ListBuffer
@@ -12,7 +14,7 @@ class DateRangeSplit extends FunSuite {
     val startDate = LocalDate.parse("2017-08-01")
     val endDate = LocalDate.parse("2018-08-01")
 
-    val ranges = DateRange(startDate, endDate).splitInMonths(3)
+    val ranges = DateRange(startDate, endDate).splitInChunks(ChunkDuration(3, ChronoUnit.MONTHS))
 
     assert(startDate == ranges(0).startDate)
     assert(endDate == ranges(ranges.length - 1).endDate)
@@ -22,7 +24,7 @@ class DateRangeSplit extends FunSuite {
     val startDate = LocalDate.parse("2017-08-01")
     val endDate = LocalDate.parse("2017-09-01")
 
-    val ranges = DateRange(startDate, endDate).splitInMonths(3)
+    val ranges = DateRange(startDate, endDate).splitInChunks(ChunkDuration(3, ChronoUnit.MONTHS))
 
     assert(ranges.size == 1)
     assert(startDate == ranges(0).startDate)
@@ -33,47 +35,56 @@ class DateRangeSplit extends FunSuite {
     val startDate = LocalDate.parse("2017-08-01")
     val endDate = LocalDate.parse("2017-12-01")
 
-    val ranges = DateRange(startDate, endDate).splitInMonths(3)
-
+    val ranges = DateRange(startDate, endDate).splitInChunks(ChunkDuration(3, ChronoUnit.MONTHS))
+    println(ranges)
     assert(ranges.size == 2)
     assert(startDate == ranges(0).startDate)
     assert(endDate == ranges(1).endDate)
   }
 
+  case class ChunkDuration(value:Int, units:ChronoUnit) {
+    def addTo(date:LocalDate) = {
+     units match  {
+        case ChronoUnit.DAYS ⇒ date.plusDays(value)
+        case ChronoUnit.MONTHS ⇒ date.plusMonths(value)
+        case _ ⇒ throw new InvalidArgumentException(Array("Only days and months are supported"))
+      }
+    }
+  }
 
   case class DateRange(startDate:LocalDate, endDate:LocalDate) {
 
-    def splitInMonths(noOfMonths:Int) = {
-      val ranges = new ListBuffer[DateRange]()
-      var rangeSplit = monthsAfterStartDate(noOfMonths)
-      while (rangeSplit.endsBefore(endDate)) {
-        ranges += rangeSplit
-        rangeSplit = rangeSplit.monthsAfterEndDate(noOfMonths)
+    def splitInChunks(chunkDuration:ChunkDuration):List[DateRange] = {
+      val chunks = new ListBuffer[DateRange]()
+      var chunk = firstChunk(chunkDuration)
+      while (chunk.endsBefore(endDate)) {
+        chunks += chunk
+        chunk = chunk.nextChunk(chunkDuration)
       }
-      if (rangeSplit.endsOnOrAfter(endDate)) {
-        ranges += rangeSplit.endOn(endDate)
+      if (chunk.endsOnOrAfter(endDate)) {
+        chunks += chunk.endOn(endDate)
       }
-      ranges.toList
+      chunks.toList
     }
 
-    private def monthsAfterStartDate(months:Int): DateRange = {
-      DateRange(startDate, startDate.plusMonths(months))
+    private def firstChunk(chunkDuration:ChunkDuration): DateRange = {
+      DateRange(startDate, chunkDuration.addTo(startDate))
     }
 
-    private def monthsAfterEndDate(months:Int): DateRange = {
-      DateRange(dayAfterEndDay(), endDate.plusMonths(months))
+    private def nextChunk(chunkDuration:ChunkDuration): DateRange = {
+      DateRange(dayAfterEndDay(), chunkDuration.addTo(endDate))
     }
 
-    private def endsBefore(endDate:LocalDate) = {
-      endDate.isBefore(endDate)
+    private def endsBefore(otherDate:LocalDate) = {
+      endDate.isBefore(otherDate)
     }
 
-    private def endsOnOrAfter(endDate:LocalDate) = {
-      endDate.isAfter(endDate) || endDate.isEqual(endDate)
+    private def endsOnOrAfter(otherDate:LocalDate) = {
+      otherDate.isAfter(otherDate) || otherDate.isEqual(otherDate)
     }
 
-    private def endOn(endDate:LocalDate):DateRange = {
-      DateRange(startDate, endDate)
+    private def endOn(otherDate:LocalDate):DateRange = {
+      DateRange(startDate, otherDate)
     }
 
     private def dayAfterEndDay() = {
