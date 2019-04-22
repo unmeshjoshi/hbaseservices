@@ -56,7 +56,7 @@ abstract class DataPipelineTestBase extends FunSuite with BeforeAndAfterAll with
   }
 
   override protected def beforeAll(): Unit = {
-    EmbeddedKafka.start()(embeddedKafkaConfig)
+    val embeddedK = EmbeddedKafka.start()(embeddedKafkaConfig)
     val cluster = hbaseTestUtility.startMiniCluster()
   }
 

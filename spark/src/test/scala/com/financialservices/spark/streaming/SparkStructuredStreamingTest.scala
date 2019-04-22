@@ -9,10 +9,11 @@ import org.apache.spark.sql.SparkSession
 
 
 class SparkStructuredStreamingTest extends DataPipelineTestBase {
-  val positionsTestDataGenerator = new AccountPositionTestDataGenerator(hbaseTestUtility.getConnection)
+  var positionsTestDataGenerator:AccountPositionTestDataGenerator = _
 
   override protected def beforeAll() = {
     super.beforeAll()
+    positionsTestDataGenerator = new AccountPositionTestDataGenerator(hbaseTestUtility.getConnection)
     positionsTestDataGenerator.createTable()
   }
 
@@ -37,6 +38,7 @@ class SparkStructuredStreamingTest extends DataPipelineTestBase {
     val gemfireCache = new TestGemfireCache()
 
     SparkStructuredStreaming.processStream(gemfireCache, sparkSession, bootstrapServers, HbaseConnectionProperties(conf), kafkaTopic, shouldFail = true)
+
     val hbaseRepository = new HBaseRepository(sparkSession, HbaseConnectionProperties(conf))
 
     eventually {
